@@ -1,7 +1,8 @@
 # emacs: -*- mode: python-mode; py-indent-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
 # ex: set sts=4 ts=4 sw=4 et:
 
-from .due import due, Doi, BibTex
+from .version import __version__
+from .due import due, Doi, BibTeX
 
 due.cite(BibTeX("""@incollection{NIPS2016_6274,
                 title = {Generalized Correspondence-LDA Models (GC-LDA) for Identifying Functional Regions in the Brain},
@@ -16,6 +17,16 @@ due.cite(BibTeX("""@incollection{NIPS2016_6274,
                 """),
          description='Introduces GC-LDA.',
          version=__version__, path='python_gclda_package', cite_module=True)
-due.cite(Doi('10.1101/059618'),
+due.cite(BibTeX("""@article {Rubin059618,
+            	author = {Rubin, Timothy N and Koyejo, Oluwasanmi and Gorgolewski, Krzysztof J and Jones, Michael N and Poldrack, Russell A and Yarkoni, Tal},
+            	title = {Decoding brain activity using a large-scale probabilistic functional-anatomical atlas of human cognition},
+            	year = {2016},
+            	doi = {10.1101/059618},
+            	publisher = {Cold Spring Harbor Labs Journals},
+            	URL = {http://www.biorxiv.org/content/early/2016/06/18/059618},
+            	eprint = {http://www.biorxiv.org/content/early/2016/06/18/059618.full.pdf},
+            	journal = {bioRxiv}
+                }
+                """),
          description='Describes uses of GC-LDA.',
          version=__version__, path='python_gclda_package', cite_module=True)
