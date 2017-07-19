@@ -16,7 +16,7 @@ due.cite(BibTeX("""@incollection{NIPS2016_6274,
                 }
                 """),
          description='Introduces GC-LDA.',
-         version=__version__, path='python_gclda_package', cite_module=True)
+         version=__version__, path='gclda', cite_module=True)
 due.cite(BibTeX("""@article {Rubin059618,
             	author = {Rubin, Timothy N and Koyejo, Oluwasanmi and Gorgolewski, Krzysztof J and Jones, Michael N and Poldrack, Russell A and Yarkoni, Tal},
             	title = {Decoding brain activity using a large-scale probabilistic functional-anatomical atlas of human cognition},
@@ -29,4 +29,4 @@ due.cite(BibTeX("""@article {Rubin059618,
                 }
                 """),
          description='Describes uses of GC-LDA.',
-         version=__version__, path='python_gclda_package', cite_module=True)
+         version=__version__, path='gclda', cite_module=True)

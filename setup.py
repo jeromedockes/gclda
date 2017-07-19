@@ -1,10 +1,12 @@
+# emacs: -*- mode: python-mode; py-indent-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
+# ex: set sts=4 ts=4 sw=4 et:
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
 # fetch version from within python_gclda_package module
-with open(os.path.join('python_gclda_package', 'version.py')) as f:
+with open(os.path.join('gclda', 'version.py')) as f:
     exec(f.read())
 
 config = {
@@ -15,8 +17,8 @@ config = {
     'author_email': 'tim.rubin@gmail.com',
     'version': __version__,
     'install_requires': ['numpy','scipy','matplotlib'],
-    'packages': ['python_gclda_package'],
-    'name': 'python_gclda'
+    'packages': ['gclda'],
+    'name': 'gclda'
 }
 
 setup(**config)
