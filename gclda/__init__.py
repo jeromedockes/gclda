@@ -1,9 +1,12 @@
 # emacs: -*- mode: python-mode; py-indent-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
 # ex: set sts=4 ts=4 sw=4 et:
-
+from .dataset import Dataset
+from .model import Model
 from .version import __version__
+
 from .due import due, Doi, BibTeX
 
+# Citations for the method.
 due.cite(BibTeX("""@incollection{NIPS2016_6274,
                 title = {Generalized Correspondence-LDA Models (GC-LDA) for Identifying Functional Regions in the Brain},
                 author = {Rubin, Timothy and Koyejo, Oluwasanmi O and Jones, Michael N and Yarkoni, Tal},
@@ -30,3 +33,6 @@ due.cite(BibTeX("""@article {Rubin059618,
                 """),
          description='Describes uses of GC-LDA.',
          version=__version__, path='gclda', cite_module=True)
+
+# Cleanup
+del due, Doi, BibTeX
