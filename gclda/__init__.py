@@ -1,5 +1,9 @@
 # emacs: -*- mode: python-mode; py-indent-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
 # ex: set sts=4 ts=4 sw=4 et:
+"""
+GCLDA- A Python package for performing Generalized Correspondence Latent
+Dirichlet Allocation.
+"""
 from .dataset import Dataset
 from .model import Model
 from .version import __version__
