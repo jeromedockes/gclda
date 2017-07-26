@@ -4,9 +4,75 @@
 Class and functions for dataset-related stuff.
 """
 from __future__ import print_function
-from os.path import join
+from os.path import join, isfile
 
 import numpy as np
+import pandas as pd
+
+
+def import_neurosynth(neurosynth_dataset, out_dir='.', prefix='',
+                      counts_file=None, abstracts_file=None, email=None):
+    """
+    Transform Neurosynth's data into gcLDA-compatible files.
+    """
+    if prefix:
+        prefix_sep = '_'
+    else:
+        prefix_sep = ''
+    
+    # Word labels file
+    word_labels = neurosynth_dataset.get_feature_names()
+    word_labels_df = pd.DataFrame(columns=['word_label'], data=word_labels)
+    word_labels_df.to_csv(join(out_dir, prefix+prefix_sep+'word_labels.txt'), sep='\t')
+    
+    # Word indices file
+    widx_mapper = {word: i for (i, word) in enumerate(word_labels)}
+    
+    if counts_file is None or not isfile(counts_file):
+        from sklearn.feature_extraction.text import CountVectorizer
+        
+        if abstracts_file is None or not isfile(abstracts_file):
+            from neurosynth.base.dataset import download_abstracts
+            abstracts_df = download_abstracts(email=email)
+        else:
+            abstracts_df = pd.read_csv(abstracts_file)
+        vectorizer = CountVectorizer(vocabulary=word_labels)
+        weights = vectorizer.fit_transform(abstracts_df['abstract'].tolist()).toarray()
+        counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=word_labels,
+                                data=weights)
+    else:
+        counts_df = pd.read_csv(counts_file, index_col='pmid')
+
+    # Use subset of studies with abstracts for everything else
+    pmids = counts_df.index.values
+    docidx_mapper = {pmid: i for (i, pmid) in enumerate(pmids)}
+    
+    # Create docidx and widx columns and melt dataframe
+    counts_df['id'] = counts_df.index
+    counts_df['docidx'] = counts_df['id'].map(docidx_mapper)
+    counts_df = counts_df.drop('id', 1)
+    widx_df = pd.melt(counts_df, id_vars=['docidx'], var_name='word',
+                      value_name='count')
+    widx_df['widx'] = widx_df['word'].map(widx_mapper)
+    
+    # Replicate rows based on count
+    widx_df = widx_df.loc[np.repeat(widx_df.index.values, widx_df['count'])]
+    widx_df = widx_df[['docidx', 'widx']]
+    widx_df.to_csv(join(out_dir, prefix+prefix_sep+'word_indices.txt'), sep='\t')
+    
+    # Peak indices file    
+    peak_df = neurosynth_dataset.activations    
+    peak_df['docidx'] = peak_df['id'].map(docidx_mapper)
+    peak_df = peak_df.dropna(subset=['docidx'])
+    peak_indices = peak_df[['docidx', 'x', 'y', 'z']].values
+    peak_indices_df = pd.DataFrame(columns=['docidx', 'xval', 'yval', 'zval'],
+                                   data=peak_indices)
+    peak_indices_df.to_csv(join(out_dir, prefix+prefix_sep+'peak_indices.txt'),
+                           sep='\t')
+    
+    # PMIDs file
+    pmids_df = pd.DataFrame(columns=['pmid'], data=pmids)
+    pmids_df.to_csv(join(out_dir, prefix+prefix_sep+'pmids.txt'), sep='\t')
 
 
 class Dataset(object):
