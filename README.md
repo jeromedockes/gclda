@@ -42,7 +42,7 @@ The repository consists of:
 
 ## Dataset formatting
 
-The `Dataset` class requires four .txt files containing all dataset features that the gcLDA model needs to operate. Please see the example datasets in the [datasets/neurosynth](datasets/neurosynth) subdirectory, for examples of properly formatted data. For additional details about these files, please see [README.txt](README.txt) in the [documentation](documentation) subdirectory.
+The `Dataset` class requires four .txt files containing all dataset features that the gcLDA model needs to operate. Please see the example datasets in the [datasets/neurosynth](datasets/neurosynth) subdirectory, for examples of properly formatted data. For additional details about these files, please see [README.txt](documentation/README.txt) in the [documentation](documentation) subdirectory.
 
 ## Tutorial usage examples
 
@@ -58,13 +58,13 @@ There is also a version of this same tutorial in the following Jupyter notebook:
 
 For additional examples of how to use the code, please see the following scripts in the 'examples' subdirectory:
 
-- 'script_run_gclda.py': Illustrates how to build a dataset object from a version of the Neurosynth dataset, and then train a gcLDA model (using the dataset object and several hyper-parameter settings that get passed to the model constructor).
-- 'script_export_gclda_figs.py': Illustrates how to export model data and png files illustrating each topic from a trained gcLDA model object.
-- 'script_predict_holdout_data.py': Illustrates how to compute the log-likelihood for a hold-out dataset.
+- [script_run_gclda.py](examples/script_run_gclda.py): Illustrates how to build a dataset object from a version of the Neurosynth dataset, and then train a gcLDA model (using the dataset object and several hyper-parameter settings that get passed to the model constructor).
+- [script_export_gclda_figs.py](examples/script_export_gclda_figs.py): Illustrates how to export model data and png files illustrating each topic from a trained gcLDA model object.
+- [script_predict_holdout_data.py](examples/script_predict_holdout_data.py): Illustrates how to compute the log-likelihood for a hold-out dataset.
 
 Note that these scripts operate on the following version of the Neurosynth dataset: "2015Filtered2_TrnTst1P1", which is a training dataset from which a subset document data has been removed for testing (the test-data is in the dataset: "2015Filtered2_TrnTst1P2"). The complete Neurosynth dataset, without any test-data removed, is the version labeled "2015Filtered2".
 
-Additional details about the gcLDA code, gcLDA hyper-parameter settings, and about these scripts are provided in the 'README.txt' in the 'documentation' subdirectory, as well as in the comments of the 'script_run_gclda.py' file. Note that all three models presented in the source paper ('no subregions', 'unconstrained subregions' and 'constrained subregions') can be trained by modifying the model hyper-parameters appropriately.
+Additional details about the gcLDA code, gcLDA hyper-parameter settings, and about these scripts are provided in the [README.txt](documentation/README.txt) in the [documentation](documentation) subdirectory, as well as in the comments of the [script_run_gclda.py](examples/script_run_gclda.py) file. Note that all three models presented in the source paper ('no subregions', 'unconstrained subregions' and 'constrained subregions') can be trained by modifying the model hyper-parameters appropriately.
 
 ## Example results for trained models
 
