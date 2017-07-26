@@ -4,7 +4,7 @@
 Class and functions for model-related stuff.
 
 """
-from __future__ import print_function
+from __future__ import print_function, division
 import os
 
 import numpy as np
@@ -17,57 +17,68 @@ class Model(object):
     Class object for a gcLDA dataset
     Model Constructor and Initialization Method
     """
-    def __init__(self, dat, nt=100, nr=2, alpha=.1, beta=.01, gamma=.01,
+    def __init__(self, dat, n_topics=100, n_regions=2, alpha=.1, beta=.01, gamma=.01,
                  delta=1.0, dobs=25.0, roi=50.0, symmetric=False, seed_init=1):
         """
         Constructor: Create a gcLDA model using a dataset object and
         hyperparameter arguments
 
         Input parameters:
-            dat         Dataset object
-            nt             Number of topics
-            nr              Number of subregions (>=1)
-            alpha         Prior count on topics for each doc
-            beta         Prior count on word-types for each topic
-            gamma         Prior count added to y-counts when sampling z assignments
-            delta         Prior count on subregions for each topic
-            roi         Default spatial 'Region of interest' size (default value
+            dat:        Dataset object
+            n_topics:   Number of topics
+            n_regions:  Number of subregions (>=1)
+            alpha:      Prior count on topics for each doc
+            beta:       Prior count on word-types for each topic
+            gamma:      Prior count added to y-counts when sampling z
+                        assignments
+            delta:      Prior count on subregions for each topic
+            roi:        Default spatial 'Region of interest' size (default value
                         of diagonals in covariance matrix for spatial
                         distribution, which the distributions are biased
                         towards)
-            dobs         Spatial Region 'default observations' (# observations
+            dobs:       Spatial Region 'default observations' (# observations
                         weighting Sigma estimates in direction of default 'roi'
                         value)
-            symmetric     Use symmetry constraint on subregions? (symmetry
-                        requires nr = 2)
-            seed_init     Initial value of random seed
+            symmetric:  Use symmetry constraint on subregions? (symmetry
+                        requires n_regions = 2)
+            seed_init:  Initial value of random seed
         """
 
         print('Constructing GC-LDA Model')
         # --- Checking to make sure parameters are valid
-        if (symmetric is True) and (nr != 2):
+        if (symmetric is True) and (n_regions != 2):
             # symmetric model only valid if R = 2
-            raise ValueError('Cannot run a symmetric model unless #Subregions (nr) == 2 !')
+            raise ValueError('Cannot run a symmetric model unless #Subregions (n_regions) == 2 !')
 
         # --- Assign dataset object to model
         self.dat = dat
 
         # --- Initialize sampling parameters
-        self.iter = 0                     # Tracks the global sampling iteration of the model
-        self.seed_init = seed_init         # Random seed for initializing model
-        self.seed = 0                     # Tracks current random seed to use (gets incremented after initialization and each sampling update)
+        self.iter = 0  # Tracks the global sampling iteration of the model
+        self.seed_init = seed_init  # Random seed for initializing model
+        self.seed = 0  # Tracks current random seed to use (gets incremented
+                       # after initialization and each sampling update)
 
         # --- Set up gcLDA model hyper-parameters from input
-        # Pseudo-count hyperparams need to be floats so that when sampling distributions are computed the count matrices/vectors are converted to floats
-        self.nt = nt                     # Number of topics (T)
-        self.nr = nr                     # Number of subregions (R)
-        self.alpha = float(alpha)      # Prior count on topics for each doc (\alpha)
-        self.beta = float(beta)         # Prior count on word-types for each topic (\beta)
-        self.gamma = float(gamma)         # Prior count added to y-counts when sampling z assignments (\gamma)
-        self.delta = float(delta)        # Prior count on subregions for each topic (\delta)
-        self.roi = float(roi)        # Default ROI (default covariance spatial region we regularize towards) (not in paper)
-        self.dobs = float(dobs)        # Sample constant (# observations weighting sigma in direction of default covariance) (not in paper)
-        self.symmetric = symmetric        # Use constrained symmetry on subregions? (only for nr = 2)
+        # Pseudo-count hyperparams need to be floats so that when sampling
+        # distributions are computed the count matrices/vectors are converted
+        # to floats
+        self.n_topics = n_topics  # Number of topics (T)
+        self.n_regions = n_regions  # Number of subregions (R)
+        self.alpha = float(alpha)  # Prior count on topics for each doc (\alpha)
+        self.beta = float(beta)  # Prior count on word-types for each topic
+                                 # (\beta)
+        self.gamma = float(gamma)  # Prior count added to y-counts when sampling
+                                   # z assignments (\gamma)
+        self.delta = float(delta)  # Prior count on subregions for each topic
+                                   # (\delta)
+        self.roi = float(roi)  # Default ROI (default covariance spatial region
+                               # we regularize towards) (not in paper)
+        self.dobs = float(dobs)  # Sample constant (# observations weighting
+                                 # sigma in direction of default covariance)
+                                 # (not in paper)
+        self.symmetric = symmetric  # Use constrained symmetry on subregions?
+                                    # (only for n_regions = 2)
 
         # --- Get dimensionalities of vectors/matrices from dataset object
         self.nz = len(dat.widx)  # Number of word-tokens
@@ -79,78 +90,105 @@ class Model(object):
         #  --- Preallocate vectors of Assignment indices
         self.zidx = np.zeros(self.nz, dtype=int)  # word->topic assignments (z)
         self.yidx = np.zeros(self.ny, dtype=int)  # peak->topic assignments (y)
-        self.ridx = np.zeros(self.ny, dtype=int)  # peak->subregion assignments (c)
+        self.ridx = np.zeros(self.ny, dtype=int)  # peak->subregion assignments
+                                                  # (c)
 
         #  --- Preallocate count matrices
-        self.ny_d_t = np.zeros(shape=(self.nd, self.nt), dtype=int)  # Peaks: D x T: Number of peak-tokens assigned to each topic per document
-        self.ny_r_t = np.zeros(shape=(self.nr, self.nt), dtype=int)  # Peaks: R x T: Number of peak-tokens assigned to each subregion per topic
-        self.nz_w_t = np.zeros(shape=(self.nw, self.nt), dtype=int)  # Words: W x T: Number of word-tokens assigned to each topic per word-type
-        self.nz_d_t = np.zeros(shape=(self.nd, self.nt), dtype=int)  # Words: D x T: Number of word-tokens assigned to each topic per document
-        self.nz_sum_t = np.zeros(shape=(1, self.nt), dtype=int)  # Words: 1 x T: Total number of word-tokens assigned to each topic (across all docs)
+        # Peaks: D x T: Number of peak-tokens assigned to each topic per
+        # document
+        self.ny_d_t = np.zeros(shape=(self.nd, self.n_topics), dtype=int)
+        # Peaks: R x T: Number of peak-tokens assigned to each subregion per
+        # topic
+        self.ny_r_t = np.zeros(shape=(self.n_regions, self.n_topics), dtype=int)
+        # Words: W x T: Number of word-tokens assigned to each topic per
+        # word-type
+        self.nz_w_t = np.zeros(shape=(self.nw, self.n_topics), dtype=int)
+        # Words: D x T: Number of word-tokens assigned to each topic per
+        # document
+        self.nz_d_t = np.zeros(shape=(self.nd, self.n_topics), dtype=int)
+        # Words: 1 x T: Total number of word-tokens assigned to each topic
+        # (across all docs)
+        self.nz_sum_t = np.zeros(shape=(1, self.n_topics), dtype=int)
 
-        #  --- Preallocate Gaussians for all subregions
-        #  Regions_Mu & Regions_Sigma: Gaussian mean and covariance for all subregions of all topics
-        #  Formed using lists (over topics) of lists (over subregions) of numpy arrays
-        #        regions_mu    = (nt, nr,      1, nxdims)
-        #        regions_sigma = (nt, nr, nxdims, nxdims)
+        # --- Preallocate Gaussians for all subregions
+        # Regions_Mu & Regions_Sigma: Gaussian mean and covariance for all
+        # subregions of all topics
+        # Formed using lists (over topics) of lists (over subregions) of numpy
+        # arrays
+        #   regions_mu = (n_topics, n_regions, 1, nxdims)
+        #   regions_sigma = (n_topics, n_regions, nxdims, nxdims)
         self.regions_mu = []
         self.regions_sigma = []
-        for t in xrange(self.nt):
+        for i_topic in xrange(self.n_topics):
             topic_mu = []
             topic_sigma = []
-            for r in xrange(self.nr):
+            for j_region in xrange(self.n_regions):
                 topic_mu.append(np.zeros(shape=(1, self.nxdims)))
                 topic_sigma.append(np.zeros(shape=(self.nxdims, self.nxdims)))
             self.regions_mu.append(topic_mu)  # (\mu^{(t)}_r)
             self.regions_sigma.append(topic_sigma)  # (\sigma^{(t)}_r)
 
-        #  --- Initialize lists for tracking log-likelihood of data over sampling iterations
-        self.loglikely_iter = []  # Tracks iteration we compute each loglikelihood at
+        # --- Initialize lists for tracking log-likelihood of data over
+        # sampling iterations
+        self.loglikely_iter = []  # Tracks iteration we compute each
+                                  # loglikelihood at
         self.loglikely_x = []  # Tracks log-likelihood of peak tokens
         self.loglikely_w = []  # Tracks log-likelihood of word tokens
         self.loglikely_tot = []  # Tracks log-likelihood of peak + word tokens
 
-    # ------------------------------------------------------------------------------------
-    #  Random Initialization: Initial z, y, r assignments. Get Initial Spatial Estimates
-    # ------------------------------------------------------------------------------------
-
     def initialize(self):
+        """
+        Random Initialization: Initial z, y, r assignments.
+        Get Initial Spatial Estimates
+        """
         print('Initializing GC-LDA Model')
 
         # --- Seed random number generator
-        np.random.seed(self.seed_init)
+        np.random.seed(self.seed_init)  # pylint: disable=no-member
 
-        # --- Randomly initialize peak->topic assignments (y) ~ unif(1...nt)
-        self.yidx[:] = np.random.randint(self.nt, size=(self.ny))
+        # --- Randomly initialize peak->topic assignments (y) ~ unif(1...n_topics)
+        self.yidx[:] = np.random.randint(self.n_topics, size=(self.ny))  # pylint: disable=no-member
+
         # --- Initialize peak->subregion assignments (r)
-        #        if asymmetric model, randomly sample r ~ unif(1...nr)
-        #        if symmetric model use deterministic assignment : if peak_val[0] > 0, r = 1, else r = 0
+        #   if asymmetric model, randomly sample r ~ unif(1...n_regions)
+        #   if symmetric model use deterministic assignment :
+        #       if peak_val[0] > 0, r = 1, else r = 0
         if not self.symmetric:
-            self.ridx[:] = np.random.randint(self.nr, size=(self.ny))
+            self.ridx[:] = np.random.randint(self.n_regions, size=(self.ny))  # pylint: disable=no-member
         else:
             self.ridx[:] = (self.dat.peak_vals[:, 0] > 0).astype(int)
 
         # Update model vectors and count matrices to reflect y and r assignments
         for i in xrange(self.ny):
-            d = self.dat.peak_didx[i] - 1  # document -idx (d): we use "-1" to convert from 1-based indexing (in data) to 0-based indexing (in python)
+            d = self.dat.peak_didx[i] - 1  # document -idx (d): we use '-1' to
+                                           # convert from 1-based indexing (in
+                                           # data) to 0-based indexing (in
+                                           # python)
             y = self.yidx[i]  # peak-token -> topic assignment (y_i)
             r = self.ridx[i]  # peak-token -> subregion assignment (c_i)
             self.ny_d_t[d, y] += 1  # Increment document-by-topic counts
             self.ny_r_t[r, y] += 1  # Increment region-by-topic
 
-        # --- Randomly Initialize Word->Topic Assignments (z) for each word token w_i: sample z_i proportional to p(topic|doc_i)
+        # --- Randomly Initialize Word->Topic Assignments (z) for each word
+        # token w_i: sample z_i proportional to p(topic|doc_i)
         for i in xrange(self.nz):
-            w = self.dat.widx[i] - 1  # w_i word-type: convert widx from 1-based to 0-based indexing
-            d = self.dat.wdidx[i] - 1  # w_i doc-index: convert wdidx from 1-based to 0-based indexing
+            w = self.dat.widx[i] - 1  # w_i word-type: convert widx from
+                                      # 1-based to 0-based indexing
+            d = self.dat.wdidx[i] - 1  # w_i doc-index: convert wdidx from
+                                       # 1-based to 0-based indexing
 
             # Estimate p(t|d) for current doc
             p_t_d = self.ny_d_t[d] + self.gamma
 
             # Sample a topic from p(t|d) for the z-assignment
-            probs = np.cumsum(p_t_d)  # Compute a cdf of the sampling distribution for z
-            sample_locs = probs < np.random.rand() * probs[-1]  # Which elements of cdf are less than random sample?
-            sample_locs = np.where(sample_locs)  # How many elements of cdf are less than sample
-            z = len(sample_locs[0])  # z = # elements of cdf less than rand-sample
+            probs = np.cumsum(p_t_d)  # Compute a cdf of the sampling
+                                      # distribution for z
+            # Which elements of cdf are less than random sample?
+            sample_locs = probs < np.random.rand() * probs[-1]  # pylint: disable=no-member
+            sample_locs = np.where(sample_locs)  # How many elements of cdf are
+                                                 # less than sample
+            z = len(sample_locs[0])  # z = # elements of cdf less than
+                                     # rand-sample
 
             # Update model assignment vectors and count-matrices to reflect z
             self.zidx[i] = z  # Word-token -> topic assignment (z_i)
@@ -161,16 +199,15 @@ class Model(object):
         # --- Get Initial Spatial Parameter Estimates
         self.update_regions()
 
-        # --- Get Log-Likelihood of data for Initialized model and save to variables tracking loglikely
+        # --- Get Log-Likelihood of data for Initialized model and save to
+        # variables tracking loglikely
         self.compute_log_likelihood(self.dat)
 
     # -------------------------------------------------------------------------------
     # <<<<< Model Parameter Update Methods >>>> Update z, Update y/r, Update regions  |
     # -------------------------------------------------------------------------------
 
-    # -------------------------------------------------------------------
-    #
-    def run_complete_iteration(self, loglikely_Freq=1, verbose=2):
+    def run_complete_iteration(self, loglikely_freq=1, verbose=2):
         """
         Run a complete update cycle (sample z, sample y&r, update regions)
 
@@ -188,11 +225,14 @@ class Model(object):
         if verbose > 1:
             print('iter {0:02d} updating spatial params'.format(self.iter))
         self.update_regions()  # Update gaussian estimates for all subregions
-        # Only update loglikelihood every 'loglikely_Freq' iterations (Computing log-likelihood isn't necessary and slows things down a bit)
-        if (self.iter % loglikely_Freq == 0):
+
+        # Only update loglikelihood every 'loglikely_freq' iterations
+        # (Computing log-likelihood isn't necessary and slows things down a bit)
+        if self.iter % loglikely_freq == 0:
             if verbose > 1:
                 print('iter {0:02d} computing log-likelihood'.format(self.iter))
-            self.compute_log_likelihood(self.dat)  # Compute log-likelihood of model in current state
+            self.compute_log_likelihood(self.dat)  # Compute log-likelihood of
+                                                   # model in current state
             if verbose > 0:
                 print('Iter {0:02d} Log-likely: x = {1:10.1f}, w = {2:10.1f}, '
                       'tot = {3:10.1f}'.format(self.iter, self.loglikely_x[-1],
@@ -204,14 +244,16 @@ class Model(object):
         Update z indicator variables assigning words->topics
         """
         # --- Seed random number generator
-        np.random.seed(randseed)
+        np.random.seed(randseed)  # pylint: disable=no-member
 
         # Loop over all word tokens
         for i in range(self.nz):
             # Get indices for current token
-            w = self.dat.widx[i] - 1      # w_i word-type: convert widx from 1-based to 0-based indexing
-            d = self.dat.wdidx[i] - 1     # w_i doc-index: convert wdidx from 1-based to 0-based indexing
-            z = self.zidx[i]            # current Topic-assignment for word token w_i
+            w = self.dat.widx[i] - 1  # w_i word-type: convert widx from
+                                      # 1-based to 0-based indexing
+            d = self.dat.wdidx[i] - 1  # w_i doc-index: convert wdidx from
+                                       # 1-based to 0-based indexing
+            z = self.zidx[i]  # current Topic-assignment for word token w_i
 
             # Decrement count-matrices to remove current zidx
             self.nz_w_t[w, z] -= 1
@@ -226,10 +268,13 @@ class Model(object):
             probs = p_w_t * p_t_d  # The unnormalized sampling distribution
 
             # Sample a z_i assignment for the current word-token from the sampling distribution
-            probs = np.squeeze(probs) / np.sum(probs)     # Normalize the sampling distribution
-            vec = np.random.multinomial(1, probs)         # Numpy returns a [1 x T] vector with a '1' in the index of sampled topic
-            vec_loc = np.where(vec)                        # Transform the indicator vector into a single z-index (stored in tuple)
-            z = vec_loc[0][0]                            # Extract the sampled z value from the tuple
+            probs = np.squeeze(probs) / np.sum(probs)  # Normalize the sampling
+                                                       # distribution
+            # Numpy returns a [1 x T] vector with a '1' in the index of sampled topic
+            vec = np.random.multinomial(1, probs)  # pylint: disable=no-member
+            vec_loc = np.where(vec)  # Transform the indicator vector into a
+                                     # single z-index (stored in tuple)
+            z = vec_loc[0][0]  # Extract the sampled z value from the tuple
 
             # Update the indices and the count matrices using the sampled z assignment
             self.zidx[i] = z                     # Update w_i topic-assignment
@@ -242,17 +287,17 @@ class Model(object):
         Update y / r indicator variables assigning peaks->topics/subregions
         """
         # --- Seed random number generator
-        np.random.seed(randseed)
+        np.random.seed(randseed)  # pylint: disable=no-member
 
         # Retrieve p(x|r,y) for all subregions
         peak_probs = self.get_peak_probs(self.dat)
 
-        # eyemat: matrix that is added to the current doc_y_counts to generate the 'proposed' doc_y_counts. Precomputed for efficiency
-        # eyemat = np.eye(self.nt)
+        # eyemat: matrix that is added to the current doc_y_counts to generate
+        # the 'proposed' doc_y_counts. Precomputed for efficiency
+        # eyemat = np.eye(self.n_topics)
 
         # Iterate over all peaks x, and sample a new y and r assignment for each
         for i in range(self.ny):
-
             d = self.dat.peak_didx[i] - 1
             y = self.yidx[i]
             r = self.ridx[i]
@@ -260,45 +305,67 @@ class Model(object):
             self.ny_r_t[r, y] -= 1  # Decrement count in Subregion x Topic count matrix
             self.ny_d_t[d, y] -= 1  # Decrement count in Document x Topic count matrix
 
-            # Retrieve the probability of generating current x from all subregions: [R x T] array of probs
+            # Retrieve the probability of generating current x from all
+            # subregions: [R x T] array of probs
             p_x_subregions = (peak_probs[i, :, :]).transpose()
 
-            # --- Compute the probabilities of all subregions given doc: p(r|d) ~ p(r|t) * p(t|d) ---
-            p_r_t = self.ny_r_t + self.delta         # Counts of subregions per topic + prior: p(r|t)
-            p_r_t = p_r_t / np.sum(p_r_t, axis=0)     # Normalize the columns such that each topic's distribution over subregions sums to 1
-            p_t_d = self.ny_d_t[d, :] + self.alpha     # Counts of topics per document + prior: p(t|d)
+            # --- Compute the probabilities of all subregions given doc:
+            # p(r|d) ~ p(r|t) * p(t|d) ---
+            p_r_t = self.ny_r_t + self.delta  # Counts of subregions per topic
+                                              # + prior: p(r|t)
+            p_r_t = p_r_t / np.sum(p_r_t, axis=0)  # Normalize the columns such
+                                                   # that each topic's distribution
+                                                   # over subregions sums to 1
+            p_t_d = self.ny_d_t[d, :] + self.alpha  # Counts of topics per
+                                                    # document + prior: p(t|d)
             # Compute p(subregion | document): p(r|d) ~ p(r|t) * p(t|d)
-            p_r_d = np.ones([self.nr, 1]) * p_t_d * p_r_t             # [R x T] array of probs
+            p_r_d = np.ones([self.n_regions, 1]) * p_t_d * p_r_t  # [R x T] array of probs
 
             # --- Compute the multinomial probability: p(z|y) ---
             # Need the current vector of all z and y assignments for current doc
-            doc_y_counts = self.ny_d_t[d, :] + self.gamma  # The multinomial from which z is sampled is proportional to number of y assigned to each topic, plus constant \gamma
+            doc_y_counts = self.ny_d_t[d, :] + self.gamma  # The multinomial from
+                                                           # which z is sampled is
+                                                           # proportional to number
+                                                           # of y assigned to each
+                                                           # topic, plus constant \gamma
             doc_z_counts = self.nz_d_t[d, :]
-            p_z_y = np.zeros([1, self.nt])
+            p_z_y = np.zeros([1, self.n_topics])
             p_z_y[:] = self.compute_prop_multinomial_from_zy_vectors(doc_z_counts, doc_y_counts)
 
-            # Compute probability of observing word->topic assignments (z) given the vectors for all proposed peak->topic assignments (y): p(z|y)
-            # proposed_y_counts = np.dot(np.ones([self.nt,1]),doc_y_counts.reshape([1,len(doc_y_counts)]))
-            # proposed_y_counts += eyemat # Add eyemat to convert a matrix of current doc_y_counts to a matrix of proposed doc_y_counts
+            # Compute probability of observing word->topic assignments (z)
+            # given the vectors for all proposed peak->topic assignments (y): p(z|y)
+            # proposed_y_counts = np.dot(np.ones([self.n_topics,1]),
+            #                                    doc_y_counts.reshape([1,len(doc_y_counts)]))
+            # proposed_y_counts += eyemat  # Add eyemat to convert a matrix of
+            #                              # current doc_y_counts to a matrix of
+            #                              # proposed doc_y_counts
             # p_z_y[:] = self.mnpdf_proportional(doc_z_counts, proposed_y_counts) # Returns a vector proportional to p(z_d|y_d)
 
             # === Block sampling c_i and y_i assignments =====
-            # Now Compute the full sampling distribution: p(y_i,c_i|y,c,x,r,d) ~ p(x|mu, sigma) * p(r|d) * multinomial p(z|y)
-            # For subregions this decomposes into: p(y_i = t, c_i = r|y,x,r,d) ~ p(x|mu_r, sigma_r) * p(r|t) * p(t|d) * multinomial p(z|y)
+            # Now Compute the full sampling distribution:
+            # p(y_i,c_i|y,c,x,r,d) ~ p(x|mu, sigma) * p(r|d) * multinomial p(z|y)
+            # For subregions this decomposes into:
+            # p(y_i = t, c_i = r|y,x,r,d) ~ p(x|mu_r, sigma_r) *
+            # p(r|t) * p(t|d) * multinomial p(z|y)
 
             # Get the full sampling distribution:
-            probs_pdf = p_x_subregions * p_r_d * np.dot(np.ones([self.nr, 1]), p_z_y)  # [R x T] array containing the proportional probability of all y/r combinations
+            probs_pdf = p_x_subregions * p_r_d * np.dot(np.ones([self.n_regions, 1]), p_z_y)  # [R x T] array containing the proportional probability of all y/r combinations
             probs_pdf = probs_pdf.transpose().ravel()  # Convert from a [R x T] matrix into a [R*T x 1] array we can sample from
             probs_pdf = probs_pdf / np.sum(probs_pdf)  # Normalize the sampling distribution
 
-            # Sample a single element (corresponding to a y_i and c_i assignment for the peak token) from the sampling distribution
-            vec = np.random.multinomial(1, probs_pdf)  # Returns a [1 x R*T] vector with a '1' in location that was sampled
-            vec_loc = np.where(vec)  # Converts the indicator vector into a linear index value (stored in a tuple)
+            # Sample a single element (corresponding to a y_i and c_i assignment
+            # for the peak token) from the sampling distribution
+            # Returns a [1 x R*T] vector with a '1' in location that was sampled
+            vec = np.random.multinomial(1, probs_pdf)  # pylint: disable=no-member
+            vec_loc = np.where(vec)  # Converts the indicator vector into a linear
+                                     # index value (stored in a tuple)
             sample_idx = vec_loc[0][0]  # Extract the linear index value from the tuple
 
-            # Transform the linear index of the sampled element into the subregion/topic (r/y) assignment indices
-            r = np.remainder(sample_idx, self.nr)   # Subregion sampled (r)
-            y = sample_idx / self.nr                 # Topic sampled (y)
+            # Transform the linear index of the sampled element into the
+            # subregion/topic (r/y) assignment indices
+            # Subregion sampled (r)
+            r = np.remainder(sample_idx, self.n_regions)  # pylint: disable=no-member
+            y = int(np.floor(sample_idx / self.n_regions))  # Topic sampled (y)
 
             # Update the indices and the count matrices using the sampled y/r assignments
             self.ny_r_t[r, y] += 1  # Increment count in Subregion x Topic count matrix
@@ -317,12 +384,12 @@ class Model(object):
         if not self.symmetric:
             # --- If model subregions not symmetric ---
             # For each region, compute a mean and a regularized covariance matrix
-            for t in range(self.nt):
-                for r in range(self.nr):
+            for i_topic in range(self.n_topics):
+                for j_region in range(self.n_regions):
                     # -- Get all peaks assigned to current topic & subregion --
-                    idx = (self.yidx == t) & (self.ridx == r)
+                    idx = (self.yidx == i_topic) & (self.ridx == j_region)
                     vals = self.dat.peak_vals[idx]
-                    nobs = self.ny_r_t[r, t]
+                    nobs = self.ny_r_t[j_region, i_topic]
 
                     # -- Estimate Mean --
                     # If there are no observations, we set mean equal to zeros, otherwise take MLE
@@ -332,33 +399,37 @@ class Model(object):
                         mu = np.mean(vals, axis=0)
 
                     # -- Estimate Covariance --
-                    # if there are 1 or fewer observations, we set sigma_hat equal to default ROI, otherwise take MLE
+                    # if there are 1 or fewer observations, we set sigma_hat
+                    # equal to default ROI, otherwise take MLE
                     if nobs <= 1:
-                        C_hat = A
+                        c_hat = A
                     else:
-                        C_hat = np.cov(np.transpose(vals))
+                        c_hat = np.cov(np.transpose(vals))
 
-                    # Regularize the covariance, using the ratio of observations to dobs (default constant # observations)
+                    # Regularize the covariance, using the ratio of observations
+                    # to dobs (default constant # observations)
                     d_c = nobs / (nobs + self.dobs)
-                    sigma = d_c * C_hat + (1-d_c) * A
+                    sigma = d_c * c_hat + (1-d_c) * A
 
                     # --  Store estimates in model object --
-                    self.regions_mu[t][r][:] = mu
-                    self.regions_sigma[t][r][:] = sigma
+                    self.regions_mu[i_topic][j_region][:] = mu
+                    self.regions_sigma[i_topic][j_region][:] = sigma
         else:
             # --- If model subregions are symmetric ---
-            # With symmetric subregions, we jointly compute all estimates for subregions 1 & 2, constraining the means to be symmetric w.r.t. the origin along x-dimension
-            for t in range(self.nt):
+            # With symmetric subregions, we jointly compute all estimates for
+            # subregions 1 & 2, constraining the means to be symmetric w.r.t.
+            # the origin along x-dimension
+            for i_topic in range(self.n_topics):
 
                 # -- Get all peaks assigned to current topic & subregion 1 --
-                idx1 = (self.yidx == t) & (self.ridx == 0)
+                idx1 = (self.yidx == i_topic) & (self.ridx == 0)
                 vals1 = self.dat.peak_vals[idx1]
-                nobs1 = self.ny_r_t[0, t]
+                nobs1 = self.ny_r_t[0, i_topic]
 
                 # -- Get all peaks assigned to current topic & subregion 2 --
-                idx2 = (self.yidx == t) & (self.ridx == 1)
+                idx2 = (self.yidx == i_topic) & (self.ridx == 1)
                 vals2 = self.dat.peak_vals[idx2]
-                nobs2 = self.ny_r_t[1, t]
+                nobs2 = self.ny_r_t[1, i_topic]
 
                 # -- Get all peaks assigned to current topic & either subregion --
                 allvals = self.dat.peak_vals[idx1 | idx2]
@@ -395,8 +466,8 @@ class Model(object):
                 mu2[0, 1:] = weighted_mean_otherdims
 
                 # --  Store estimates in model object --
-                self.regions_mu[t][0][:] = mu1
-                self.regions_mu[t][1][:] = mu2
+                self.regions_mu[i_topic][0][:] = mu1
+                self.regions_mu[i_topic][1][:] = mu2
 
                 # --------------------------
                 # -- Estimate Covariances --
@@ -405,24 +476,24 @@ class Model(object):
                 # Covariances are estimated independently
                 # Cov for subregion 1
                 if nobs1 <= 1:
-                    C_hat1 = A
+                    c_hat1 = A
                 else:
-                    C_hat1 = np.cov(np.transpose(vals1))
+                    c_hat1 = np.cov(np.transpose(vals1))
                 # Cov for subregion 2
                 if nobs2 <= 1:
-                    C_hat2 = A
+                    c_hat2 = A
                 else:
-                    C_hat2 = np.cov(np.transpose(vals2))
+                    c_hat2 = np.cov(np.transpose(vals2))
 
                 # Regularize the covariances, using the ratio of observations to sample_constant
                 d_c_1 = (nobs1) / (nobs1 + self.dobs)
                 d_c_2 = (nobs2) / (nobs2 + self.dobs)
-                sigma1 = d_c_1 * C_hat1 + (1-d_c_1) * A
-                sigma2 = d_c_2 * C_hat2 + (1-d_c_2) * A
+                sigma1 = d_c_1 * c_hat1 + (1-d_c_1) * A
+                sigma2 = d_c_2 * c_hat2 + (1-d_c_2) * A
 
                 # --  Store estimates in model object --
-                self.regions_sigma[t][0][:] = sigma1
-                self.regions_sigma[t][1][:] = sigma2
+                self.regions_sigma[i_topic][0][:] = sigma1
+                self.regions_sigma[i_topic][1][:] = sigma2
 
     # --------------------------------------------------------------------------------
     # <<<<< Utility Methods for GC-LDA >>>>> Log-Likelihood, Get Peak-Probs , mnpdf  |
@@ -435,12 +506,13 @@ class Model(object):
         or test) given the posterior predictive distributions over peaks and
         word-types for the model.
 
-        c.f. Newman et al. (2009) "Distribution algorithms Topic Models" for
+        c.f. Newman et al. (2009) 'Distribution algorithms Topic Models' for
         standard LDA
         Note that this is not computing the joint log-likelihood of model
         parameters and data
         """
-        # --- Pre-compute all probabilities from count matrices that are needed for loglikelihood computations
+        # --- Pre-compute all probabilities from count matrices that are needed
+        # for loglikelihood computations
 
         # Compute docprobs for y = ND x NT: p( y_i=t | d )
         doccounts = self.ny_d_t + self.alpha
@@ -463,7 +535,8 @@ class Model(object):
         wordprobs = wordcounts / wordcounts_sum
 
         # --- Get the matrix giving p(x_i|r,t) for all x:
-        #    NY x NT x NR matrix of probabilities of all peaks given all topic/subregion spatial distributions
+        #    NY x NT x NR matrix of probabilities of all peaks given all
+        #    topic/subregion spatial distributions
         peak_probs = self.get_peak_probs(dat)
 
         # -----------------------------------------------------------------------------
@@ -475,16 +548,22 @@ class Model(object):
         # Go over all observed peaks and add p(x|model) to running total
         for i in range(dat.npeaks):
             d = dat.peak_didx[i] - 1  # convert didx from 1-idx to 0-idx
-            p_x = 0  # Running total for p(x|d) across subregions: Compute p(x_i|d) for each subregion separately and then sum across the subregions
-            for r in range(self.nr):
-                p_t_d = docprobs_y[d]             # p(t|d) - p(topic|doc)
-                p_r_t = regionprobs[r]             # p(r|t) - p(subregion|topic)
-                p_r_d = p_t_d * p_r_t             # p(r|d) - p(subregion|document) = p(topic|doc)*p(subregion|topic)
+            p_x = 0  # Running total for p(x|d) across subregions:
+                     # Compute p(x_i|d) for each subregion separately and then
+                     # sum across the subregions
+            for j_region in range(self.n_regions):
+                p_t_d = docprobs_y[d]  # p(t|d) - p(topic|doc)
+                p_r_t = regionprobs[j_region]  # p(r|t) - p(subregion|topic)
+                p_r_d = p_t_d * p_r_t  # p(r|d) - p(subregion|document) =
+                                       # p(topic|doc)*p(subregion|topic)
 
-                p_x_r = peak_probs[i, :, r]         # p(x|r) - p(x|subregion)
-                p_x_rd = np.dot(p_r_d, p_x_r)     # p(x|subregion,doc) = sum_topics ( p(subregion|doc) * p(x|subregion) )
-                p_x += p_x_rd                    # Add probability for current subregion to total probability for token across subregions
-            x_loglikely += np.log(p_x)          # Add probability for current token to running total for all x tokens
+                p_x_r = peak_probs[i, :, j_region]  # p(x|r) - p(x|subregion)
+                p_x_rd = np.dot(p_r_d, p_x_r)  # p(x|subregion,doc) = sum_topics
+                                               # ( p(subregion|doc) * p(x|subregion) )
+                p_x += p_x_rd  # Add probability for current subregion to total
+                               # probability for token across subregions
+            # Add probability for current token to running total for all x tokens
+            x_loglikely += np.log(p_x)  # pylint: disable=no-member
 
         # -----------------------------------------------------------------------------
         # --- Compute observed words (w) Loglikelihoods:
@@ -492,15 +571,17 @@ class Model(object):
         #                    = p_t_d * p_w_t
         w_loglikely = 0  # Initialize variable tracking total loglikelihood of all w tokens
 
-        # Compute a matrix of posterior predictives over words: = ND x NW p(w|d) = sum_t ( p(t|d) * p(w|t) )
+        # Compute a matrix of posterior predictives over words:
+        # = ND x NW p(w|d) = sum_t ( p(t|d) * p(w|t) )
         p_w_d = np.dot(docprobs_z, np.transpose(wordprobs))
 
         # Go over all observed word tokens and add p(w|model) to running total
         for i in range(dat.nwords):
-            w = dat.widx[i] - 1      # convert widx  from 1-idx to 0-idx
-            d = dat.wdidx[i] - 1     # convert wdidx from 1-idx to 0-idx
-            p_w = p_w_d[d, w]            # Probability of sampling current w token from d
-            w_loglikely += np.log(p_w)    # Add log-probability of current token to running total for all w tokens
+            w = dat.widx[i] - 1  # convert widx  from 1-idx to 0-idx
+            d = dat.wdidx[i] - 1  # convert wdidx from 1-idx to 0-idx
+            p_w = p_w_d[d, w]  # Probability of sampling current w token from d
+            # Add log-probability of current token to running total for all w tokens
+            w_loglikely += np.log(p_w)  # pylint: disable=no-member
 
         # -----------------------------------------------------------------------------
         # --- Update model log-likelihood history vector (if update_vectors == True)
@@ -510,8 +591,8 @@ class Model(object):
             self.loglikely_w.append(w_loglikely)
             self.loglikely_tot.append(x_loglikely+w_loglikely)
 
-        # ---------------------------------------------------------------------------------------------------------------
-        # --- Return loglikely values (used when computing log-likelihood for a dataset-object containing hold-out data)
+        # --- Return loglikely values (used when computing log-likelihood for a
+        # dataset-object containing hold-out data)
         return (x_loglikely, w_loglikely, x_loglikely + w_loglikely)
 
     def get_peak_probs(self, dat):
@@ -522,12 +603,13 @@ class Model(object):
         NY x NT x NR matrix of probabilities, giving probability of sampling
         each peak (x) from all subregions
         """
-        peak_probs = np.zeros(shape=(dat.npeaks, self.nt, self.nr), dtype=float)
-        for t in range(self.nt):
-            for r in range(self.nr):
-                peak_probs[:, t, r] = multivariate_normal.pdf(dat.peak_vals,
-                                                              mean=self.regions_mu[t][r][0],
-                                                              cov=self.regions_sigma[t][r])
+        peak_probs = np.zeros(shape=(dat.npeaks, self.n_topics, self.n_regions), dtype=float)
+        for i_topic in range(self.n_topics):
+            for j_region in range(self.n_regions):
+                pdf = multivariate_normal.pdf(dat.peak_vals,
+                                              mean=self.regions_mu[i_topic][j_region][0],
+                                              cov=self.regions_sigma[i_topic][j_region])
+                peak_probs[:, i_topic, j_region] = pdf
         return peak_probs
 
     def mnpdf_proportional(self, x, p):
@@ -538,24 +620,31 @@ class Model(object):
         likelihood (sampler only requires proportionality).
 
         Inputs:
-          x = a 1-by-T vector of observation
-          p = A T-by-T matrix, where each row is one of the updated proposal distributions to y
-          output: a 1-by-T vector giving the propostional probability of sampling x from each row of input y
+          x:      A 1-by-T vector of observation
+          p:      A T-by-T matrix, where each row is one of the updated proposal
+                  distributions to y
+          output: A 1-by-T vector giving the propostional probability of
+                  sampling x from each row of input y
         """
 
-        # First remove all columns for which we have no observations (dramatically speeds up computation)
-        xPos = x > 0
-        x = x[xPos]
-        p = p[:, xPos]
+        # First remove all columns for which we have no observations
+        # (dramatically speeds up computation)
+        x_pos = x > 0
+        x = x[x_pos]
+        p = p[:, x_pos]
 
-        # Now compute the probability sampling x from the row-probability vector (in log-space): product_i( p_i^(x_i) ), for all positive indices i
+        # Now compute the probability sampling x from the row-probability vector
+        # (in log-space): product_i( p_i^(x_i) ), for all positive indices i
         m, _ = np.shape(p)
         x = np.dot(np.ones([m, 1]), x.reshape([1, len(x)]))
-        xlogp = x * np.log(p)
-        xlogp = np.sum(xlogp, axis=1)         # Row-sums give total (proportional) of sampling vector x from rows of p
+        xlogp = x * np.log(p)  # pylint: disable=no-member
+
+        # Row-sums give total (proportional) of sampling vector x from rows of p
+        xlogp = np.sum(xlogp, axis=1)
 
         # Exponentiate to convert from log-space
-        y = np.exp(xlogp - np.max(xlogp))     # Add a constant before exponentiating to avoid any underflow issues
+        # Add a constant before exponentiating to avoid any underflow issues
+        y = np.exp(xlogp - np.max(xlogp))
         return y
 
     def compute_prop_multinomial_from_zy_vectors(self, z, y):
@@ -566,13 +655,16 @@ class Model(object):
         probabilities of all proposals for y_i.
 
         Inputs:
-          z = a 1-by-T vector of current z counts for document d
-          y = a 1-by-T vector of current y counts (plus gamma) for document d
-          output: a 1-by-T vector giving the proportional probability of z, given that topic t was incremented
+          z:        A 1-by-T vector of current z counts for document d
+          y:        A 1-by-T vector of current y counts (plus gamma) for
+                    document d
+          output:   A 1-by-T vector giving the proportional probability of z,
+                    given that topic t was incremented
         """
         # Compute the proportional probabilities in log-space
-        logp = z * np.log((y+1) / y)
-        p = np.exp(logp - np.max(logp))  # Add a constant before exponentiating to avoid any underflow issues
+        logp = z * np.log((y+1) / y)  # pylint: disable=no-member
+        p = np.exp(logp - np.max(logp))  # Add a constant before exponentiating
+                                         # to avoid any underflow issues
         return p
 
     # --------------------------------------------------------------------------------
@@ -626,24 +718,25 @@ class Model(object):
         with open(outfilestr, 'w+') as fid:
             # print(the topic-headers
             fid.write('WordLabel,')  # Header of wlabel column
-            for t in range(self.nt):
-                outstr = 'Topic_%02d,' % (t+1)
+            for i_topic in range(self.n_topics):
+                outstr = 'Topic_%02d,' % (i_topic+1)
                 fid.write(outstr)
             fid.write('\n')
 
-            # For each row / wlabel: wlabel-string and its count under each topic (the \phi matrix before adding \beta and normalizing)
-            for w in range(self.nw):
-                # print(wlabel[w]
-                outstr = '%s,' % self.dat.wlabels[w]
+            # For each row / wlabel: wlabel-string and its count under each
+            # topic (the \phi matrix before adding \beta and normalizing)
+            for i_word in range(self.nw):
+                # print(wlabel[i_word])
+                outstr = '%s,' % self.dat.wlabels[i_word]
                 fid.write(outstr)
                 # print(counts under all topics
-                for t in range(self.nt):
-                    outstr = '%d,' % self.nz_w_t[w, t]
+                for j_topic in range(self.n_topics):
+                    outstr = '%d,' % self.nz_w_t[i_word, j_topic]
                     fid.write(outstr)
                 # Newline for next wlabel row
                 fid.write('\n')
 
-    def print_topic_word_probs(self, outfilestr, K=15):
+    def print_topic_word_probs(self, outfilestr, n_top_words=15):
         """
         print(Topic->Word probability distributions for top K words to File
         """
@@ -651,8 +744,10 @@ class Model(object):
         with open(outfilestr, 'w+') as fid:
             # Compute topic->word probs and marginal topic-probs
             wprobs = self.nz_w_t + self.beta
-            topic_probs = np.sum(wprobs, axis=0) / np.sum(wprobs)     # Marginal topicprobs
-            wprobs = wprobs / np.sum(wprobs, axis=0)                 # Normalized word-probs
+
+            # Marginal topicprobs
+            topic_probs = np.sum(wprobs, axis=0) / np.sum(wprobs)
+            wprobs = wprobs / np.sum(wprobs, axis=0)  # Normalized word-probs
 
             # Get the sorted probabilities and indices of words under each topic
             rnk_vals = np.sort(wprobs, axis=0)
@@ -660,28 +755,30 @@ class Model(object):
             rnk_idx = np.argsort(wprobs, axis=0)
             rnk_idx = rnk_idx[::-1]
 
-            # print(the topic-headers
-            for t in range(self.nt):
-                # print(each topic and it's marginal probability to columns
-                outstr = 'Topic_%02d,%.4f,' % (t+1, topic_probs[t])
+            # Print the topic-headers
+            for i_topic in range(self.n_topics):
+                # Print each topic and it's marginal probability to columns
+                outstr = 'Topic_%02d,%.4f,' % (i_topic+1, topic_probs[i_topic])
                 fid.write(outstr)
             fid.write('\n')
 
-            # print(the top K word-strings and word-probs for each topic
-            for i in range(K):
-                for t in range(self.nt):
+            # Print the top K word-strings and word-probs for each topic
+            for i in range(n_top_words):
+                for j_topic in range(self.n_topics):
                     # print(the kth word in topic t and it's probability
-                    outstr = '%s,%.4f,' % (self.dat.wlabels[rnk_idx[i, t]],
-                                           rnk_vals[i, t])
+                    outstr = '%s,%.4f,' % (self.dat.wlabels[rnk_idx[i,
+                                                                    j_topic]],
+                                           rnk_vals[i, j_topic])
                     fid.write(outstr)
                 fid.write('\n')
 
     def print_topic_figures(self, outputdir, backgroundpeakfreq=10):
         """
-        print(Topic Figures: Spatial distributions and Linguistic distributions
+        Print Topic Figures: Spatial distributions and Linguistic distributions
         for top K words.
 
-        backgroundpeakfreq: Determines what proportion of peaks we show in the background of each figure
+        backgroundpeakfreq: Determines what proportion of peaks we show in the
+        background of each figure
         """
         # If output directory doesn't exist, make it
         if not os.path.isdir(outputdir):
@@ -691,16 +788,17 @@ class Model(object):
         # ^^ This would need to be changed for handling different data-types
         opts_axlims = [[-75, 75], [-110, 90], [-60, 80]]
         regioncolors = ['r', 'b', 'm', 'g', 'c', 'b']
-        # Get a subset of values to use as background (to illustrate extent of all peaks)
+        # Get a subset of values to use as background (to illustrate extent of
+        # all peaks)
         backgroundvals = self.dat.peak_vals[range(1, len(self.dat.peak_vals)-1,
                                                   backgroundpeakfreq),
                                             :]
         backgroundvals = np.transpose(backgroundvals)
 
         # Loop over all topics and make a figure for each
-        for t in range(self.nt):
+        for i_topic in range(self.n_topics):
             # Set up save file name (convert to base-1 indexing)
-            outfilestr = '%s/Topic_%02d.png' % (outputdir, t+1)
+            outfilestr = '%s/Topic_%02d.png' % (outputdir, i_topic+1)
 
             # Create figure
             fig = plt.figure(figsize=(10, 10), dpi=80)
@@ -714,11 +812,11 @@ class Model(object):
             ax1.scatter(backgroundvals[0], backgroundvals[2], color='0.6',
                         s=12, marker='o', alpha=.15)
             # Plot all subregion points in the subregion colors
-            for r in range(self.nr):
-                idx = (self.yidx == t) & (self.ridx == r)
+            for j_region in range(self.n_regions):
+                idx = (self.yidx == i_topic) & (self.ridx == j_region)
                 vals = self.dat.peak_vals[idx]
                 valsplot = np.transpose(vals)
-                ax1.scatter(valsplot[0], valsplot[2], c=regioncolors[r],
+                ax1.scatter(valsplot[0], valsplot[2], c=regioncolors[j_region],
                             s=12, lw=0, marker='^', alpha=.5)
             ax1.set_xlabel('X')
             ax1.set_ylabel('Z')
@@ -732,11 +830,11 @@ class Model(object):
             ax2.scatter(backgroundvals[1], backgroundvals[2], color='0.6',
                         s=12, marker='o', alpha=.15)
             # Plot all subregion points in the subregion colors
-            for r in range(self.nr):
-                idx = (self.yidx == t) & (self.ridx == r)
+            for j_region in range(self.n_regions):
+                idx = (self.yidx == i_topic) & (self.ridx == j_region)
                 vals = self.dat.peak_vals[idx]
                 valsplot = np.transpose(vals)
-                ax2.scatter(valsplot[1], valsplot[2], c=regioncolors[r],
+                ax2.scatter(valsplot[1], valsplot[2], c=regioncolors[j_region],
                             s=12, lw=0, marker='^', alpha=.5)
             ax2.set_xlabel('Y')
             ax2.set_ylabel('Z')
@@ -746,26 +844,28 @@ class Model(object):
             # --- TOP-VIEW: X-BY-Y
             ax3 = fig.add_subplot(223)
             ax3.axis('equal')
+
             # --- Plot background points in gray
             ax3.scatter(backgroundvals[0], backgroundvals[1], color='0.6',
                         s=12, marker='o', alpha=.15)
+
             # --- Plot all subregion points in the subregion colors
-            for r in range(self.nr):
-                idx = (self.yidx == t) & (self.ridx == r)
+            for j_region in range(self.n_regions):
+                idx = (self.yidx == i_topic) & (self.ridx == j_region)
                 vals = self.dat.peak_vals[idx]
                 valsplot = np.transpose(vals)
-                ax3.scatter(valsplot[0], valsplot[1], c=regioncolors[r],
+                ax3.scatter(valsplot[0], valsplot[1], c=regioncolors[j_region],
                             s=12, lw=0, marker='^', alpha=.5)
             ax3.set_xlabel('X')
             ax3.set_ylabel('Y')
             ax3.set_xlim(opts_axlims[0])
             ax3.set_ylim(opts_axlims[1])
 
-            # <<<< print(words & Region-probs >>>>
+            # <<<< Print words & Region-probs >>>>
 
-            # ------- Get strings giving top K words and probs for the current topic ------
-            k = 12
-            wprobs = self.nz_w_t[:, t] + self.beta
+            # Get strings giving top K words and probs for the current topic
+            n_top_words = 12
+            wprobs = self.nz_w_t[:, i_topic] + self.beta
             wprobs = wprobs / np.sum(wprobs)
             # Get rankings of words
             wrnk = np.argsort(wprobs)
@@ -774,9 +874,9 @@ class Model(object):
             # Create strings showing (1) top-K words (2) top-k probs for current topic
             outstr_labels = ''
             outstr_vals = ''
-            for i in range(k):
-                outstr_labels = outstr_labels + self.dat.wlabels[wrnk[i]] + '\n'
-                outstr_vals = outstr_vals + "%5.3f" % wprobs[wrnk[i]] + '\n'
+            for j_top_word in range(n_top_words):
+                outstr_labels = outstr_labels + self.dat.wlabels[wrnk[j_top_word]] + '\n'
+                outstr_vals = outstr_vals + '%5.3f' % wprobs[wrnk[j_top_word]] + '\n'
 
             # Fourth axis: Show top-k words and word-probs, then show region-probs
             ax4 = fig.add_subplot(224)
@@ -791,18 +891,23 @@ class Model(object):
                      verticalalignment='top')
 
             # Now get subregion-probs for current topic
-            rprobs = self.ny_r_t[:, t] + float(self.delta)
+            rprobs = self.ny_r_t[:, i_topic] + float(self.delta)
             rprobs = rprobs / sum(rprobs)
 
-            # print(the region probs and means to axis
+            # Print the region probs and means to axis
             outstr_region = 'Region-ID    p(r|t)     mu_1  mu_2  mu_3'
             plt.text(.03, .30, outstr_region, color='k',
                      horizontalalignment='left', verticalalignment='top')
-            for r in range(self.nr):
-                outstr_region = 'Region %02d: %6.2f  |  %6.1f  %6.1f  %6.1f' % (r+1, rprobs[r], self.regions_mu[t][r][0][0], self.regions_mu[t][r][0][1], self.regions_mu[t][r][0][2])
-                plt.text(.03, .22 - (.06*r), outstr_region,
-                         color=regioncolors[r], horizontalalignment='left',
-                         verticalalignment='top')
+            for j_region in range(self.n_regions):
+                outstr_region = 'Region {0:02d}: {1:6.2f}  |  {2:6.1f}  {3:6.1f}  {4:6.1f}'
+                outstr_region = outstr_region.format(j_region+1, rprobs[j_region],
+                                                     self.regions_mu[i_topic][j_region][0][0],
+                                                     self.regions_mu[i_topic][j_region][0][1],
+                                                     self.regions_mu[i_topic][j_region][0][2])
+                plt.text(.03, .22 - (.06*j_region), outstr_region,
+                         color=regioncolors[j_region],
+                         horizontalalignment='left', verticalalignment='top')
+
             # Save figure to file and close it
             fig.savefig(outfilestr, dpi=fig.dpi)
             plt.close(fig)
@@ -813,70 +918,69 @@ class Model(object):
 
     def display_model_summary(self):
         """
-        print(model summary to console.
+        Print model summary to console.
         """
-        print("--- Model Summary ---")
-        print(" Current State:")
-        print("\t Current iteration   = %d" % self.iter)
-        print("\t Initialization Seed = %d" % self.seed_init)
+        print('--- Model Summary ---')
+        print(' Current State:')
+        print('\t Current iteration   = {0}'.format(self.iter))
+        print('\t Initialization Seed = {0}'.format(self.seed_init))
         # ^^^ Update
         if len(self.loglikely_tot) > 0:
-            print("\t Current Log-Likely  = %d" % self.loglikely_tot[-1])
+            print('\t Current Log-Likely  = {0}'.format(self.loglikely_tot[-1]))
         else:
-            print("\t Current Log-Likely = ** Not Available: Model not yet initialized **")
-        print(" Model Hyper-Parameters:")
-        print("\t Symmetric = %s" % self.symmetric)
-        print("\t nt    = %d" % self.nt)
-        print("\t nr    = %d" % self.nr)
-        print("\t alpha = %.3f" % self.alpha)
-        print("\t beta  = %.3f" % self.beta)
-        print("\t gamma = %.3f" % self.gamma)
-        print("\t delta = %.3f" % self.delta)
-        print("\t roi   = %.3f" % self.roi)
-        print("\t dobs  = %d" % self.dobs)
-        print(" Model Training-Data Information:")
-        print("\t Dataset Label        = %s" % self.dat.datasetLabel)
-        print("\t # Word-Tokens (nz)   = %d" % self.nz)
-        print("\t # Peak-Tokens (ny)   = %d" % self.ny)
-        print("\t # Word-Types (nw)    = %d" % self.nw)
-        print("\t # Documents (nd)     = %d" % self.nd)
-        print("\t # Peak-Dimensions    = %d" % self.nxdims)
-        # print(" DEBUG: Count matrices dimensionality:"
-        # print("\t ny_d_t   = %r" % (self.ny_d_t.shape,)
-        # print("\t ny_r_t   = %r" % (self.ny_r_t.shape,)
-        # print("\t nz_w_t   = %r" % (self.nz_w_t.shape,)
-        # print("\t nz_sum_t = %r" % (self.nz_sum_t.shape,)
-        # print("\t regions_mu    = %r" % (np.shape(self.regions_mu),)
-        # print("\t regions_sigma = %r" % (np.shape(self.regions_sigma),)
-        # print(" DEBUG: Indicator vectors:"
-        # print("\t zidx   = %r" % self.zidx.shape
-        # print("\t yidx   = %r" % self.yidx.shape
-        # print("\t ridx   = %r" % self.ridx.shape
-        # print(" DEBUG: Sums (1):"
-        # print("\t sum(ny_d_t)   = %r" % np.sum(self.ny_d_t)
-        # print("\t sum(ny_r_t)   = %r" % np.sum(self.ny_r_t)
-        # print("\t sum(nz_w_t)   = %r" % np.sum(self.nz_w_t)
-        # print("\t sum(nz_d_t)   = %r" % np.sum(self.nz_d_t)
-        # print("\t sum(nz_sum_t) = %r" % np.sum(self.nz_sum_t)
-        # print(" DEBUG: Sums (2):"
-        # print("\t sum(ny_d_t, axis=0)   = %r" % np.sum(self.ny_d_t, axis=0)
-        # print("\t sum(ny_r_t, axis=0)   = %r" % np.sum(self.ny_r_t, axis=0)
+            print('\t Current Log-Likely = ** Not Available: '
+                  'Model not yet initialized **')
+        print(' Model Hyper-Parameters:')
+        print('\t Symmetric = {0}'.format(self.symmetric))
+        print('\t n_topics    = {0}'.format(self.n_topics))
+        print('\t n_regions = {0}'.format(self.n_regions))
+        print('\t alpha = {0:.3f}'.format(self.alpha))
+        print('\t beta  = {0:.3f}'.format(self.beta))
+        print('\t gamma = {0:.3f}'.format(self.gamma))
+        print('\t delta = {0:.3f}'.format(self.delta))
+        print('\t roi   = {0:.3f}'.format(self.roi))
+        print('\t dobs  = {0}'.format(self.dobs))
+        print(' Model Training-Data Information:')
+        print('\t Dataset Label        = {0}'.format(self.dat.dataset_label))
+        print('\t # Word-Tokens (nz)   = {0}'.format(self.nz))
+        print('\t # Peak-Tokens (ny)   = {0}'.format(self.ny))
+        print('\t # Word-Types (nw)    = {0}'.format(self.nw))
+        print('\t # Documents (nd)     = {0}'.format(self.nd))
+        print('\t # Peak-Dimensions    = {0}'.format(self.nxdims))
+        # print(' DEBUG: Count matrices dimensionality:'
+        # print('\t ny_d_t   = %r' % (self.ny_d_t.shape,)
+        # print('\t ny_r_t   = %r' % (self.ny_r_t.shape,)
+        # print('\t nz_w_t   = %r' % (self.nz_w_t.shape,)
+        # print('\t nz_sum_t = %r' % (self.nz_sum_t.shape,)
+        # print('\t regions_mu    = %r' % (np.shape(self.regions_mu),)
+        # print('\t regions_sigma = %r' % (np.shape(self.regions_sigma),)
+        # print(' DEBUG: Indicator vectors:'
+        # print('\t zidx   = %r' % self.zidx.shape
+        # print('\t yidx   = %r' % self.yidx.shape
+        # print('\t ridx   = %r' % self.ridx.shape
+        # print(' DEBUG: Sums (1):'
+        # print('\t sum(ny_d_t)   = %r' % np.sum(self.ny_d_t)
+        # print('\t sum(ny_r_t)   = %r' % np.sum(self.ny_r_t)
+        # print('\t sum(nz_w_t)   = %r' % np.sum(self.nz_w_t)
+        # print('\t sum(nz_d_t)   = %r' % np.sum(self.nz_d_t)
+        # print('\t sum(nz_sum_t) = %r' % np.sum(self.nz_sum_t)
+        # print(' DEBUG: Sums (2):'
+        # print('\t sum(ny_d_t, axis=0)   = %r' % np.sum(self.ny_d_t, axis=0)
+        # print('\t sum(ny_r_t, axis=0)   = %r' % np.sum(self.ny_r_t, axis=0)
 
     def get_model_display_string(self):
         """
         Get a model-string, unique to current dataset label + parameter
         settings.
         """
-        outstr = ('{0}_{1}T_{2}R_alpha{4:.3f}_beta{5:.3f}_'
-                  'gamma{6:.3f}_delta{7:.3f}_{8}dobs_{9:.1f}roi_{10}symmetric_'
-                  '{11}').format(self.dat.datasetLabel, self.nt, self.nr,
-                                 self.alpha, self.beta, self.gamma, self.delta,
-                                 self.dobs, self.roi, self.symmetric,
-                                 self.seed_init)
+        outstr = ('{0}_{1}T_{2}R_alpha{3:.3f}_beta{4:.3f}_'
+                  'gamma{5:.3f}_delta{6:.3f}_{7}dobs_{8:.1f}roi_{9}symmetric_'
+                  '{10}').format(self.dat.dataset_label, self.n_topics,
+                                 self.n_regions, self.alpha, self.beta,
+                                 self.gamma, self.delta, int(self.dobs),
+                                 self.roi, self.symmetric, self.seed_init)
         return outstr
 
 
 if __name__ == '__main__':
     print('Calling model.py as a script')
-else:
-    print('Importing model.py module v03')

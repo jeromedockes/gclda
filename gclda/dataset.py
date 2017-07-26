@@ -198,5 +198,3 @@ if __name__ == '__main__':
     GC_DATA = Dataset('2015Filtered2_1000docs', '../datasets/neurosynth/')
     GC_DATA.import_all_data()
     GC_DATA.display_dataset_summary()
-else:
-    print('Importing dataset.py')
