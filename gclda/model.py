@@ -192,13 +192,13 @@ class Model(object):
 
             # Sample a topic from p(t|d) for the z-assignment
             probs = np.cumsum(p_topic_g_doc)  # Compute a cdf of the sampling
-                                      # distribution for z
+                                              # distribution for z
             # Which elements of cdf are less than random sample?
             sample_locs = probs < np.random.rand() * probs[-1]  # pylint: disable=no-member
             sample_locs = np.where(sample_locs)  # How many elements of cdf are
                                                  # less than sample
             topic = len(sample_locs[0])  # z = # elements of cdf less than
-                                     # rand-sample
+                                         # rand-sample
 
             # Update model assignment vectors and count-matrices to reflect z
             self.wtoken_topic_idx[i_word_token] = topic  # Word-token -> topic assignment (z_i)
@@ -369,7 +369,7 @@ class Model(object):
             # [R x T] array containing the proportional probability of all y/r combinations
             probs_pdf = p_x_subregions * p_region_g_doc * np.dot(np.ones([self.n_regions, 1]),
                                                                  p_z_y)
-            
+
             # Convert from a [R x T] matrix into a [R*T x 1] array we can sample from
             probs_pdf = probs_pdf.transpose().ravel()
 
@@ -401,7 +401,8 @@ class Model(object):
 
     def _update_regions(self):
         """
-        Update spatial distribution parameters (Gaussians params for all subregions)
+        Update spatial distribution parameters (Gaussians params for all
+        subregions).
         """
         # Generate default ROI based on default_width
         A = self.roi_size * np.eye(self.n_peak_dims)
@@ -765,7 +766,7 @@ class Model(object):
             for i_word in range(self.n_word_labels):
                 # print(wlabel[i_word])
                 fid.write('{0},'.format(self.dataset.word_labels[i_word]))
-                
+
                 # Print counts under all topics
                 for j_topic in range(self.n_topics):
                     fid.write('{0},'.format(self.n_word_tokens_word_by_topic[i_word,
