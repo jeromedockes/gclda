@@ -19,12 +19,12 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
     dataset_dir = join(out_dir, dataset_label)
     if not isdir(dataset_dir):
         mkdir(dataset_dir)
-    
+
     # Word indices file
     orig_vocab = neurosynth_dataset.get_feature_names()
     if counts_file is None or not isfile(counts_file):
         from sklearn.feature_extraction.text import CountVectorizer
-        
+
         if abstracts_file is None or not isfile(abstracts_file):
             from neurosynth.base.dataset import download_abstracts
             abstracts_df = download_abstracts(neurosynth_dataset, email=email)
@@ -45,39 +45,39 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
     counts_df.index = counts_df.index.astype(str)
     pmids = counts_df.index.tolist()[:1000]
     docidx_mapper = {pmid: i for (i, pmid) in enumerate(pmids)}
-    
+
     # Create docidx column
     counts_df['id'] = counts_df.index
     counts_df['docidx'] = counts_df['id'].map(docidx_mapper)
     counts_df = counts_df.dropna(subset=['docidx'])
     counts_df = counts_df.drop('id', 1)
-    
+
     # Remove words not found anywhere in the corpus
     counts_df = counts_df.loc[:, (counts_df != 0).any(axis=0)]
-    
+
     # Get updated vocabulary
     word_labels = counts_df.columns.tolist()
     word_labels.remove('docidx')
     widx_mapper = {word: i for (i, word) in enumerate(word_labels)}
-    
+
     # Melt dataframe and create widx column
     widx_df = pd.melt(counts_df, id_vars=['docidx'], var_name='word',
                       value_name='count')
     widx_df['widx'] = widx_df['word'].map(widx_mapper)
-    
+
     # Replicate rows based on count
     widx_df = widx_df.loc[np.repeat(widx_df.index.values, widx_df['count'])]
     widx_df = widx_df[['docidx', 'widx']].astype(int)
     widx_df.sort_values(by=['docidx', 'widx'], inplace=True)
     widx_df.to_csv(join(dataset_dir, 'word_indices.txt'), sep='\t', index=False)
-    
+
     # Word labels file
     word_labels_df = pd.DataFrame(columns=['word_label'], data=word_labels)
     word_labels_df.to_csv(join(dataset_dir, 'word_labels.txt'), sep='\t',
                           index=False)
-    
+
     # Peak indices file
-    peak_df = neurosynth_dataset.activations    
+    peak_df = neurosynth_dataset.activations
     peak_df['docidx'] = peak_df['id'].astype(str).map(docidx_mapper)
     peak_df = peak_df.dropna(subset=['docidx'])
     peak_indices = peak_df[['docidx', 'x', 'y', 'z']].values
@@ -86,7 +86,7 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
     peak_indices_df['docidx'] = peak_indices_df['docidx'].astype(int)
     peak_indices_df.to_csv(join(dataset_dir, 'peak_indices.txt'), sep='\t',
                            index=False)
-    
+
     # PMIDs file
     pmids_df = pd.DataFrame(columns=['pmid'], data=pmids)
     pmids_df.to_csv(join(dataset_dir, 'pmids.txt'), sep='\t', index=False)
@@ -142,14 +142,14 @@ class Dataset(object):
         pmids_file = join(self.data_directory, self.dataset_label, 'pmids.txt')
         pmids_df = pd.read_csv(pmids_file, sep='\t')
         self.pmids = pmids_df['pmid'].tolist()
-        
+
         # Import all word-indices into a wtoken_word_idx and wtoken_doc_idx vector
         widx_file = join(self.data_directory, self.dataset_label, 'word_indices.txt')
         widx_df = pd.read_csv(widx_file, sep='\t')
         self.wtoken_doc_idx = widx_df['docidx'].tolist()
         self.wtoken_word_idx = widx_df['widx'].tolist()
         self.n_word_tokens = len(self.wtoken_word_idx)
-        
+
         # Import all peak-indices into lists
         pidx_file = join(self.data_directory, self.dataset_label, 'peak_indices.txt')
         pidx_df = pd.read_csv(pidx_file, sep='\t')
@@ -164,6 +164,8 @@ class Dataset(object):
     def apply_stop_list(self, stoplistlabel):
         """
         Apply a stop list
+
+        TODO: Implement, but put in import_neurosynth
         """
         print('Not yet implemented')
 
@@ -191,6 +193,7 @@ class Dataset(object):
         print('First {0} word_labels:'.format(n_word_labels))
         for i in range(min(n_word_labels, len(self.word_labels))):
             print(self.word_labels[i])
+
         print('...')
 
     def view_doc_labels(self, n_pmids=1000):
@@ -200,6 +203,7 @@ class Dataset(object):
         print('First {0} pmids:'.format(n_pmids))
         for i in range(min(n_pmids, len(self.pmids))):
             print(self.pmids[i])
+
         print('...')
 
     def view_word_indices(self, n_word_indices=100):
@@ -209,6 +213,7 @@ class Dataset(object):
         print('First {0} wtoken_doc_idx, wtoken_word_idx:'.format(n_word_indices))
         for i in range(min(n_word_indices, len(self.wtoken_word_idx))):
             print(self.wtoken_doc_idx[i], self.wtoken_word_idx[i])
+
         print('...')
 
     def view_peak_indices(self, n_peak_indices=100):

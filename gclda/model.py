@@ -303,10 +303,6 @@ class Model(object):
         # Retrieve p(x|r,y) for all subregions
         peak_probs = self._get_peak_probs(self.dataset)
 
-        # eyemat: matrix that is added to the current doc_y_counts to generate
-        # the 'proposed' doc_y_counts. Precomputed for efficiency
-        # eyemat = np.eye(self.n_topics)
-
         # Iterate over all peaks x, and sample a new y and r assignment for each
         for i_peak_token in range(self.n_peak_tokens):
             doc = self.dataset.ptoken_doc_idx[i_peak_token]
@@ -347,23 +343,6 @@ class Model(object):
             doc_z_counts = self.n_word_tokens_doc_by_topic[doc, :]
             p_z_y = np.zeros([1, self.n_topics])
             p_z_y[:] = self._compute_prop_multinomial_from_zy_vectors(doc_z_counts, doc_y_counts)
-
-            # Compute probability of observing word->topic assignments (z)
-            # given the vectors for all proposed peak->topic assignments (y): p(z|y)
-            # proposed_y_counts = np.dot(np.ones([self.n_topics,1]),
-            #                                    doc_y_counts.reshape([1,len(doc_y_counts)]))
-            # proposed_y_counts += eyemat  # Add eyemat to convert a matrix of
-            #                              # current doc_y_counts to a matrix of
-            #                              # proposed doc_y_counts
-            # Returns a vector proportional to p(z_d|y_d)
-            # p_z_y[:] = self.mnpdf_proportional(doc_z_counts, proposed_y_counts)
-
-            # === Block sampling c_i and y_i assignments =====
-            # Now Compute the full sampling distribution:
-            # p(y_i,c_i|y,c,x,r,d) ~ p(x|mu, sigma) * p(r|d) * multinomial p(z|y)
-            # For subregions this decomposes into:
-            # p(y_i = t, c_i = r|y,x,r,d) ~ p(x|mu_r, sigma_r) *
-            # p(r|t) * p(t|d) * multinomial p(z|y)
 
             ## Get the full sampling distribution:
             # [R x T] array containing the proportional probability of all y/r combinations
@@ -805,7 +784,7 @@ class Model(object):
                 for j_topic in range(self.n_topics):
                     # Print the kth word in topic t and it's probability
                     fid.write('{0},{1:.4f},'.format(self.dataset.word_labels[rnk_idx[i, j_topic]],
-                                                   rnk_vals[i, j_topic]))
+                                                                             rnk_vals[i, j_topic]))
                 fid.write('\n')
 
     def print_topic_figures(self, outputdir, backgroundpeakfreq=10):
