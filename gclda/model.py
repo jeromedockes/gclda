@@ -384,7 +384,7 @@ class Model(object):
         subregions).
         """
         # Generate default ROI based on default_width
-        A = self.roi_size * np.eye(self.n_peak_dims)
+        default_roi = self.roi_size * np.eye(self.n_peak_dims)
 
         if not self.symmetric:
             # --- If model subregions not symmetric ---
@@ -408,14 +408,14 @@ class Model(object):
                     # if there are 1 or fewer observations, we set sigma_hat
                     # equal to default ROI, otherwise take MLE
                     if n_obs <= 1:
-                        c_hat = A
+                        c_hat = default_roi
                     else:
                         c_hat = np.cov(np.transpose(vals))
 
                     # Regularize the covariance, using the ratio of observations
                     # to dobs (default constant # observations)
                     d_c = n_obs / (n_obs + self.dobs)
-                    sigma = d_c * c_hat + (1-d_c) * A
+                    sigma = d_c * c_hat + (1-d_c) * default_roi
 
                     # --  Store estimates in model object --
                     self.regions_mu[i_topic][j_region][:] = mu
@@ -482,20 +482,20 @@ class Model(object):
                 # Covariances are estimated independently
                 # Cov for subregion 1
                 if n_obs1 <= 1:
-                    c_hat1 = A
+                    c_hat1 = default_roi
                 else:
                     c_hat1 = np.cov(np.transpose(vals1))
                 # Cov for subregion 2
                 if n_obs2 <= 1:
-                    c_hat2 = A
+                    c_hat2 = default_roi
                 else:
                     c_hat2 = np.cov(np.transpose(vals2))
 
                 # Regularize the covariances, using the ratio of observations to sample_constant
                 d_c_1 = (n_obs1) / (n_obs1 + self.dobs)
                 d_c_2 = (n_obs2) / (n_obs2 + self.dobs)
-                sigma1 = d_c_1 * c_hat1 + (1-d_c_1) * A
-                sigma2 = d_c_2 * c_hat2 + (1-d_c_2) * A
+                sigma1 = d_c_1 * c_hat1 + (1-d_c_1) * default_roi
+                sigma2 = d_c_2 * c_hat2 + (1-d_c_2) * default_roi
 
                 # --  Store estimates in model object --
                 self.regions_sigma[i_topic][0][:] = sigma1
@@ -938,7 +938,7 @@ class Model(object):
         print(' Current State:')
         print('\t Current Iteration   = {0}'.format(self.iter))
         print('\t Initialization Seed = {0}'.format(self.seed_init))
-        if len(self.loglikely_tot) > 0:
+        if self.loglikely_tot:
             print('\t Current Log-Likely  = {0}'.format(self.loglikely_tot[-1]))
         else:
             print('\t Current Log-Likely  = ** Not Available: '
