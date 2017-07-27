@@ -89,7 +89,7 @@ class Model(object):
         self.n_word_tokens = len(dataset.wtoken_word_idx)  # Number of word-tokens
         self.n_peak_tokens = len(dataset.ptoken_doc_idx)  # Number of peak-tokens
         self.n_word_labels = len(dataset.word_labels)  # Number of word-types
-        self.n_docs = max(dataset.wtoken_doc_idx)  # Number of documents
+        self.n_docs = len(np.unique(dataset.wtoken_doc_idx))  # Number of documents
         self.n_peak_dims = dataset.n_peak_dims  # Dimensionality of peak_locs data
 
         #  --- Preallocate vectors of assignment indices
@@ -169,24 +169,23 @@ class Model(object):
 
         # Update model vectors and count matrices to reflect y and r assignments
         for i_peak_token in xrange(self.n_peak_tokens):
-            # document -idx (d): we use '-1' to convert from 1-based indexing (in
-            # data) to 0-based indexing (in python)
-            doc = self.dataset.ptoken_doc_idx[i_peak_token] - 1
+            # document -idx (d)
+            doc = self.dataset.ptoken_doc_idx[i_peak_token]
 
             topic = self.peak_topic_idx[i_peak_token]  # peak-token -> topic assignment (y_i)
             region = self.peak_region_idx[i_peak_token]  # peak-token -> subregion assignment (c_i)
             self.n_peak_tokens_doc_by_topic[doc, topic] += 1  # Increment document-by-topic
-                                                                  # counts
+                                                              # counts
             self.n_peak_tokens_region_by_topic[region, topic] += 1  # Increment region-by-topic
 
         # --- Randomly Initialize Word->Topic Assignments (z) for each word
         # token w_i: sample z_i proportional to p(topic|doc_i)
         for i_word_token in xrange(self.n_word_tokens):
-            # w_i word-type: convert wtoken_word_idx from 1-based to 0-based indexing
-            word = self.dataset.wtoken_word_idx[i_word_token] - 1
+            # w_i word-type
+            word = self.dataset.wtoken_word_idx[i_word_token]
 
-            # w_i doc-index: convert wtoken_doc_idx from 1-based to 0-based indexing
-            doc = self.dataset.wtoken_doc_idx[i_word_token] - 1
+            # w_i doc-index
+            doc = self.dataset.wtoken_doc_idx[i_word_token]
 
             # Estimate p(t|d) for current doc
             p_topic_g_doc = self.n_peak_tokens_doc_by_topic[doc] + self.gamma
@@ -226,15 +225,15 @@ class Model(object):
         """
         self.iter += 1  # Update total iteration count
         if verbose > 1:
-            print('iter {0:02d} sampling z'.format(self.iter))
+            print('iter {0:02d}: Sampling z'.format(self.iter))
         self.seed += 1
         self._update_word_topic_assignments(self.seed)  # Update z-assignments
         if verbose > 1:
-            print('iter {0:02d} sampling y|r'.format(self.iter))
+            print('Iter {0:02d}: Sampling y|r'.format(self.iter))
         self.seed += 1
         self._update_peak_assignments(self.seed)  # Update y-assignments
         if verbose > 1:
-            print('iter {0:02d} updating spatial params'.format(self.iter))
+            print('Iter {0:02d}: Updating spatial params'.format(self.iter))
         self._update_regions()  # Update gaussian estimates for all subregions
 
         # Only update loglikelihood every 'loglikely_freq' iterations
@@ -260,12 +259,8 @@ class Model(object):
         # Loop over all word tokens
         for i_word_token in range(self.n_word_tokens):
             # Get indices for current token
-            word = self.dataset.wtoken_word_idx[i_word_token] - 1  # w_i word-type: convert
-                                                                   # wtoken_word_idx from
-                                                                   # 1-based to 0-based indexing
-            doc = self.dataset.wtoken_doc_idx[i_word_token] - 1  # w_i doc-index: convert
-                                                                 # wtoken_doc_idx from
-                                                                 # 1-based to 0-based indexing
+            word = self.dataset.wtoken_word_idx[i_word_token]  # w_i word-type
+            doc = self.dataset.wtoken_doc_idx[i_word_token]  # w_i doc-index
             topic = self.wtoken_topic_idx[i_word_token]  # current topic assignment for
                                                          # word token w_i
 
@@ -314,7 +309,7 @@ class Model(object):
 
         # Iterate over all peaks x, and sample a new y and r assignment for each
         for i_peak_token in range(self.n_peak_tokens):
-            doc = self.dataset.ptoken_doc_idx[i_peak_token] - 1
+            doc = self.dataset.ptoken_doc_idx[i_peak_token]
             topic = self.peak_topic_idx[i_peak_token]
             region = self.peak_region_idx[i_peak_token]
 
@@ -374,7 +369,7 @@ class Model(object):
             # [R x T] array containing the proportional probability of all y/r combinations
             probs_pdf = p_x_subregions * p_region_g_doc * np.dot(np.ones([self.n_regions, 1]),
                                                                  p_z_y)
-
+            
             # Convert from a [R x T] matrix into a [R*T x 1] array we can sample from
             probs_pdf = probs_pdf.transpose().ravel()
 
@@ -406,8 +401,7 @@ class Model(object):
 
     def _update_regions(self):
         """
-        Update spatial distribution parameters (Gaussians params for all
-        subregions)
+        Update spatial distribution parameters (Gaussians params for all subregions)
         """
         # Generate default ROI based on default_width
         A = self.roi_size * np.eye(self.n_peak_dims)
@@ -710,7 +704,7 @@ class Model(object):
         return p
 
     # --------------------------------------------------------------------------------
-    # <<<<< Export Methods >>>>> print(Topics, Model parameters, and Figures to file |
+    # <<<<< Export Methods >>>>> Print Topics, Model parameters, and Figures to file |
     # --------------------------------------------------------------------------------
 
     def print_all_model_params(self, outputdir):
@@ -742,19 +736,17 @@ class Model(object):
         # Open the file to print(to
         with open(outfilestr, 'w+') as fid:
             # print(the column-headers
-            fid.write('Peak_X,Peak_Y,Peak_Z,Topic_Assignment,Subregion_Assignment')
-            fid.write('\n')
+            fid.write('Peak_X,Peak_Y,Peak_Z,Topic_Assignment,Subregion_Assignment\n')
 
             # For each peak-token, print(out its coordinates and current topic/subregion assignment
             for i_peak_token in range(self.n_peak_tokens):
                 # Note that we convert topic/subregion indices to 1-base idx
-                outstr = '{0},{1},{2},{3},{4}'.format(self.dataset.peak_vals[i_peak_token, 0],
-                                                      self.dataset.peak_vals[i_peak_token, 1],
-                                                      self.dataset.peak_vals[i_peak_token, 2],
-                                                      self.peak_topic_idx[i_peak_token]+1,
-                                                      self.peak_region_idx[i_peak_token]+1)
+                outstr = '{0},{1},{2},{3},{4}\n'.format(self.dataset.peak_vals[i_peak_token, 0],
+                                                        self.dataset.peak_vals[i_peak_token, 1],
+                                                        self.dataset.peak_vals[i_peak_token, 2],
+                                                        self.peak_topic_idx[i_peak_token]+1,
+                                                        self.peak_region_idx[i_peak_token]+1)
                 fid.write(outstr)
-                fid.write('\n')
 
     def print_topic_word_counts(self, outfilestr):
         """
@@ -762,23 +754,22 @@ class Model(object):
         """
         # Open the file to print(to
         with open(outfilestr, 'w+') as fid:
-            # print(the topic-headers
+            # Print the topic-headers
             fid.write('WordLabel,')  # Header of wlabel column
             for i_topic in range(self.n_topics):
-                outstr = 'Topic_{0:02d},'.format(i_topic+1)
-                fid.write(outstr)
+                fid.write('Topic_{0:02d},'.format(i_topic+1))
             fid.write('\n')
 
             # For each row / wlabel: wlabel-string and its count under each
             # topic (the \phi matrix before adding \beta and normalizing)
             for i_word in range(self.n_word_labels):
                 # print(wlabel[i_word])
-                outstr = '{0},'.format(self.dataset.word_labels[i_word])
-                fid.write(outstr)
-                # print(counts under all topics
+                fid.write('{0},'.format(self.dataset.word_labels[i_word]))
+                
+                # Print counts under all topics
                 for j_topic in range(self.n_topics):
-                    outstr = '{0},'.format(self.n_word_tokens_word_by_topic[i_word, j_topic])
-                    fid.write(outstr)
+                    fid.write('{0},'.format(self.n_word_tokens_word_by_topic[i_word,
+                                                                             j_topic]))
                 # Newline for next wlabel row
                 fid.write('\n')
 
@@ -804,17 +795,16 @@ class Model(object):
             # Print the topic-headers
             for i_topic in range(self.n_topics):
                 # Print each topic and it's marginal probability to columns
-                outstr = 'Topic_{0:02d},{1:.4f},'.format(i_topic+1, topic_probs[i_topic])
-                fid.write(outstr)
+                fid.write('Topic_{0:02d},{1:.4f},'.format(i_topic+1,
+                                                          topic_probs[i_topic]))
             fid.write('\n')
 
             # Print the top K word-strings and word-probs for each topic
             for i in range(n_top_words):
                 for j_topic in range(self.n_topics):
                     # Print the kth word in topic t and it's probability
-                    outstr = '{0},{1:.4f},'.format(self.dataset.word_labels[rnk_idx[i, j_topic]],
-                                                   rnk_vals[i, j_topic])
-                    fid.write(outstr)
+                    fid.write('{0},{1:.4f},'.format(self.dataset.word_labels[rnk_idx[i, j_topic]],
+                                                   rnk_vals[i, j_topic]))
                 fid.write('\n')
 
     def print_topic_figures(self, outputdir, backgroundpeakfreq=10):
@@ -836,8 +826,7 @@ class Model(object):
         # Get a subset of values to use as background (to illustrate extent of
         # all peaks)
         backgroundvals = self.dataset.peak_vals[range(1, len(self.dataset.peak_vals)-1,
-                                                      backgroundpeakfreq),
-                                                :]
+                                                      backgroundpeakfreq), :]
         backgroundvals = np.transpose(backgroundvals)
 
         # Loop over all topics and make a figure for each
@@ -982,15 +971,15 @@ class Model(object):
         print('\t beta      = {0:.3f}'.format(self.beta))
         print('\t gamma     = {0:.3f}'.format(self.gamma))
         print('\t delta     = {0:.3f}'.format(self.delta))
-        print('\t roi_size       = {0:.3f}'.format(self.roi_size))
+        print('\t roi_size  = {0:.3f}'.format(self.roi_size))
         print('\t dobs      = {0}'.format(self.dobs))
         print(' Model Training-Data Information:')
-        print('\t Dataset Label                   = {0}'.format(self.dataset.dataset_label))
-        print('\t   Word-Tokens (n_word_tokens)   = {0}'.format(self.n_word_tokens))
-        print('\t   Peak-Tokens (n_peak_tokens)   = {0}'.format(self.n_peak_tokens))
-        print('\t   Word-Types (n_word_labels)    = {0}'.format(self.n_word_labels))
-        print('\t   Documents (n_docs)            = {0}'.format(self.n_docs))
-        print('\t   Peak-Dimensions (n_peak_dims) = {0}'.format(self.n_peak_dims))
+        print('\t Dataset Label                 = {0}'.format(self.dataset.dataset_label))
+        print('\t Word-Tokens (n_word_tokens)   = {0}'.format(self.n_word_tokens))
+        print('\t Peak-Tokens (n_peak_tokens)   = {0}'.format(self.n_peak_tokens))
+        print('\t Word-Types (n_word_labels)    = {0}'.format(self.n_word_labels))
+        print('\t Documents (n_docs)            = {0}'.format(self.n_docs))
+        print('\t Peak-Dimensions (n_peak_dims) = {0}'.format(self.n_peak_dims))
 
         if debug:
             print(' DEBUG: Count matrices dimensionality:')
