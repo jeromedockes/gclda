@@ -43,7 +43,7 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
 
     # Use subset of studies with abstracts for everything else
     counts_df.index = counts_df.index.astype(str)
-    pmids = counts_df.index.tolist()[:1000]
+    pmids = counts_df.index.tolist()
     docidx_mapper = {pmid: i for (i, pmid) in enumerate(pmids)}
 
     # Create docidx column
@@ -178,13 +178,13 @@ class Dataset(object):
         View dataset summary
         """
         print('--- Dataset Summary ---')
-        print('\t self.dataset_label  = {0!r}'.format(self.dataset_label))
-        print('\t self.data_directory = {0!r}'.format(self.data_directory))
-        print('\t     word-types:   {0}'.format(len(self.word_labels)))
-        print('\t     word-indices: {0}'.format(self.n_word_tokens))
-        print('\t     peak-indices: {0}'.format(self.n_peak_tokens))
-        print('\t     documents:    {0}'.format(len(self.pmids)))
-        print('\t     peak-dims:    {0}'.format(self.n_peak_dims))
+        print('self.dataset_label  = {0!r}'.format(self.dataset_label))
+        print('self.data_directory = {0!r}'.format(self.data_directory))
+        print('\tword-types:   {0}'.format(len(self.word_labels)))
+        print('\tword-indices: {0}'.format(self.n_word_tokens))
+        print('\tpeak-indices: {0}'.format(self.n_peak_tokens))
+        print('\tdocuments:    {0}'.format(len(self.pmids)))
+        print('\tpeak-dims:    {0}'.format(self.n_peak_dims))
 
     def view_word_labels(self, n_word_labels=1000):
         """
