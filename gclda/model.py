@@ -711,7 +711,7 @@ class Model(object):
 
     def save(self, filename):
         """
-        Pickle the Dataset instance to the provided file.
+        Pickle the Model instance to the provided file.
         """
         with open(filename, 'w') as fo:
             pickle.dump(self, fo)
@@ -719,13 +719,15 @@ class Model(object):
     @classmethod
     def load(cls, filename):
         """
-        Load a pickled Dataset instance from file.
+        Load a pickled Model instance from file.
         """
         try:
-            model = pickle.load(open(filename, 'r'))
+            with open(filename, 'r') as fi:
+                model = pickle.load(fi)
         except UnicodeDecodeError:
             # Need to try this for python3
-            model = pickle.load(open(filename, 'r'), encoding='latin')
+            with open(filename, 'r') as fi:
+                model = pickle.load(fi, encoding='latin')
 
         return model
 

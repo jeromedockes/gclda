@@ -6,6 +6,7 @@ Class and functions for dataset-related stuff.
 from __future__ import print_function
 from os import mkdir
 from os.path import join, isfile, isdir
+import cPickle as pickle
 
 import numpy as np
 import pandas as pd
@@ -167,6 +168,28 @@ class Dataset(object):
         self.ptoken_doc_idx = pidx_df['docidx'].tolist()
         self.peak_vals = pidx_df[['x', 'y', 'z']].values
         self.n_peak_tokens, self.n_peak_dims = self.peak_vals.shape
+
+    def save(self, filename):
+        """
+        Pickle the Dataset instance to the provided file.
+        """
+        with open(filename, 'w') as fo:
+            pickle.dump(self, fo)
+
+    @classmethod
+    def load(cls, filename):
+        """
+        Load a pickled Dataset instance from file.
+        """
+        try:
+            with open(filename, 'r') as fi:
+                dataset = pickle.load(fi)
+        except UnicodeDecodeError:
+            # Need to try this for python3
+            with open(filename, 'r') as fi:
+                dataset = pickle.load(fi, encoding='latin')
+
+        return dataset
 
     # -------------------------------------------------------------------
     #  Additional utility functions
