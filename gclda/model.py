@@ -6,6 +6,7 @@ Class and functions for model-related stuff.
 from __future__ import print_function, division
 from os import mkdir
 from os.path import join, isdir
+import cPickle as pickle
 
 import numpy as np
 import nibabel as nib
@@ -697,16 +698,36 @@ class Model(object):
         mask_ijk = np.vstack(np.where(masker.volume.get_data() > 0)).T
         mask_xyz = nib.affines.apply_affine(affine, mask_ijk)
 
-        p_topic_g_voxel = np.zeros((mask_xyz.shape[0], self.n_topics), int)
+        p_topic_g_voxel = np.zeros((mask_xyz.shape[0], self.n_topics), float)
         for i_topic in range(self.n_topics):
             for j_region in range(self.n_regions):
                 pdf = multivariate_normal.pdf(mask_xyz,
                                               mean=self.regions_mu[i_topic][j_region][0],
                                               cov=self.regions_sigma[i_topic][j_region])
                 p_topic_g_voxel[:, i_topic] += pdf
-        p_topic_g_voxel /= np.sum(p_topic_g_voxel, axis=1)
+        p_topic_g_voxel /= np.sum(p_topic_g_voxel, axis=1)[:, None]
         p_topic_g_voxel = np.nan_to_num(p_topic_g_voxel, 0)
         return p_topic_g_voxel
+
+    def save(self, filename):
+        """
+        Pickle the Dataset instance to the provided file.
+        """
+        with open(filename, 'w') as fo:
+            pickle.dump(self, fo)
+
+    @classmethod
+    def load(cls, filename):
+        """
+        Load a pickled Dataset instance from file.
+        """
+        try:
+            model = pickle.load(open(filename, 'r'))
+        except UnicodeDecodeError:
+            # Need to try this for python3
+            model = pickle.load(open(filename, 'r'), encoding='latin')
+
+        return model
 
     def print_all_model_params(self, outputdir):
         """

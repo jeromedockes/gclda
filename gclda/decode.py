@@ -6,6 +6,7 @@ Class and functions for functional decoding.
 from __future__ import print_function, division
 
 import numpy as np
+import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 
 from .due import due, BibTeX
@@ -57,18 +58,22 @@ class Decoder(object):
         roi_voxels = np.where(roi_arr > 0)[0]
 
         p_topic_g_voxel = model.get_spatial_probs()
-        p_topic_g_roi = p_topic_g_voxel[:, roi_voxels]  # p(T|V) for voxels in ROI only
+        p_topic_g_roi = p_topic_g_voxel[roi_voxels, :]  # p(T|V) for voxels in ROI only
         topic_weights = np.sum(p_topic_g_roi, axis=0)  # Sum across words
         if topic_priors is not None:
-            topic_weights *= topic_priors
+            topic_weights *= topic_priors[:, None]
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
         n_word_tokens_per_topic = np.sum(model.n_word_tokens_word_by_topic, axis=0)
         p_word_g_topic = model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
         p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
-        prod = topic_weights * p_word_g_topic
-        return prod
+        word_weights = np.dot(p_word_g_topic, topic_weights)
+
+        decoded_df = pd.DataFrame(index=model.dataset.word_labels, columns=['Weight'],
+                                  data=word_weights)
+        decoded_df.index.name = 'Term'
+        return decoded_df
 
     def decode_continuous(self, image, topic_priors=None):
         """
@@ -86,20 +91,24 @@ class Decoder(object):
         model = self.model
 
         # Load image file and get voxel values
-        input_values = self.dataset.masker(image)
+        input_values = self.dataset.masker.mask(image)
 
         p_topic_g_voxel = model.get_spatial_probs()
-        topic_weights = p_topic_g_voxel * input_values
+        topic_weights = np.dot(p_topic_g_voxel.T, input_values[:, None])
         if topic_priors is not None:
-            topic_weights *= topic_priors
+            topic_weights *= topic_priors[:, None]
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
         n_word_tokens_per_topic = np.sum(model.n_word_tokens_word_by_topic, axis=0)
         p_word_g_topic = model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
         p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
-        prod = topic_weights * p_word_g_topic
-        return prod
+        word_weights = np.dot(p_word_g_topic, topic_weights)
+
+        decoded_df = pd.DataFrame(index=model.dataset.word_labels, columns=['Weight'],
+                                  data=word_weights)
+        decoded_df.index.name = 'Term'
+        return decoded_df
 
     def encode(self, text, topic_priors=None):
         """
