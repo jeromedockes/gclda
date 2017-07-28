@@ -28,10 +28,14 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
         from sklearn.feature_extraction.text import CountVectorizer
 
         if abstracts_file is None or not isfile(abstracts_file):
-            from neurosynth.base.dataset import download_abstracts
-            abstracts_df = download_abstracts(neurosynth_dataset, email=email)
-            abstracts_df.to_csv(join(dataset_dir, 'dataset_abstracts.csv'),
-                                index=False)
+            if email is not None:
+                from neurosynth.base.dataset import download_abstracts
+                abstracts_df = download_abstracts(neurosynth_dataset, email=email)
+                abstracts_df.to_csv(join(dataset_dir, 'dataset_abstracts.csv'),
+                                    index=False)
+            else:
+                raise Exception('A valid email address must be provided if '
+                                'counts_file or abstracts_file are not.')
         else:
             abstracts_df = pd.read_csv(abstracts_file)
         vectorizer = CountVectorizer(vocabulary=orig_vocab)

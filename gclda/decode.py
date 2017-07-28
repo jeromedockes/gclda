@@ -8,7 +8,22 @@ from __future__ import print_function, division
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 
+from .due import due, BibTeX
 
+
+@due.dcite(BibTeX('@article {Rubin059618,'\
+            	  'author = {Rubin, Timothy N and Koyejo, Oluwasanmi and '\
+                  'Gorgolewski, Krzysztof J and Jones, Michael N and '\
+                  'Poldrack, Russell A and Yarkoni, Tal},'\
+            	  'title = {Decoding brain activity using a large-scale probabilistic '\
+                  'functional-anatomical atlas of human cognition},'\
+            	  'year = {2016},'\
+            	  'doi = {10.1101/059618},'\
+            	  'publisher = {Cold Spring Harbor Labs Journals},'\
+            	  'URL = {http://www.biorxiv.org/content/early/2016/06/18/059618},'\
+            	  'eprint = {http://www.biorxiv.org/content/early/2016/06/18/059618.full.pdf},'\
+            	  'journal = {bioRxiv}}'),
+           description='Describes decoding methods using GC-LDA.')
 class Decoder(object):
     """
     Class object for a gcLDA decoder
@@ -18,12 +33,12 @@ class Decoder(object):
         Class object for a gcLDA decoder
         """
         self.model = model
+        self.dataset = model.dataset
 
-    def decode_discrete(self, roi_file, topic_priors=None):
+    def decode_roi(self, roi_file, topic_priors=None):
         """
-        Perform image-to-text decoding for discrete inputs (e.g., regions of
-        interest, significant clusters, or sets of studies within the dataset
-        selected via some other method).
+        Perform image-to-text decoding for discrete image inputs (e.g., regions
+        of interest, significant clusters).
 
         1.  Compute p_topic_g_voxel.
                 - I think you need p_voxel_g_topic for this, then you do:
@@ -38,7 +53,8 @@ class Decoder(object):
         model = self.model
 
         # Load ROI file and get ROI voxels
-        roi_voxels = 0
+        roi_arr = model.dataset.masker.mask(roi_file)
+        roi_voxels = np.where(roi_arr > 0)[0]
 
         p_topic_g_voxel = model.get_spatial_probs()
         p_topic_g_roi = p_topic_g_voxel[:, roi_voxels]  # p(T|V) for voxels in ROI only
@@ -52,7 +68,7 @@ class Decoder(object):
         p_word_g_topic = model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
         p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
         prod = topic_weights * p_word_g_topic
-
+        return prod
 
     def decode_continuous(self, image, topic_priors=None):
         """
@@ -67,7 +83,23 @@ class Decoder(object):
             for your map, but the values are scaled based on the input image, so
             they won't necessarily mean much.
         """
-        pass
+        model = self.model
+
+        # Load image file and get voxel values
+        input_values = self.dataset.masker(image)
+
+        p_topic_g_voxel = model.get_spatial_probs()
+        topic_weights = p_topic_g_voxel * input_values
+        if topic_priors is not None:
+            topic_weights *= topic_priors
+        topic_weights /= np.sum(topic_weights)  # tau_t
+
+        # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
+        n_word_tokens_per_topic = np.sum(model.n_word_tokens_word_by_topic, axis=0)
+        p_word_g_topic = model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
+        p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
+        prod = topic_weights * p_word_g_topic
+        return prod
 
     def encode(self, text, topic_priors=None):
         """
