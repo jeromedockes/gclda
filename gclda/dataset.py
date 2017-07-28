@@ -9,6 +9,8 @@ from os.path import join, isfile, isdir
 
 import numpy as np
 import pandas as pd
+from neurosynth.tests.utils import get_resource_path
+from neurosynth.base.mask import Masker
 
 
 def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
@@ -35,7 +37,7 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
         vectorizer = CountVectorizer(vocabulary=orig_vocab)
         weights = vectorizer.fit_transform(abstracts_df['abstract'].tolist()).toarray()
         counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=orig_vocab,
-                                data=weights)
+                                 data=weights)
         counts_df.to_csv(join(dataset_dir, 'feature_counts.txt'), sep='\t',
                          index_label='pmid')
     else:
@@ -97,7 +99,7 @@ class Dataset(object):
     Class object for a gcLDA dataset
     """
 
-    def __init__(self, dataset_label, data_directory):
+    def __init__(self, dataset_label, data_directory, mask_file=None):
         """
         Class object for a gcLDA dataset
         """
@@ -105,12 +107,17 @@ class Dataset(object):
         self.dataset_label = dataset_label
         self.data_directory = data_directory
 
+        if mask_file is None:
+            resource_dir = get_resource_path()
+            mask_file = join(resource_dir, 'MNI152_T1_2mm_brain.nii.gz')
+        self.masker = Masker(mask_file)
+
         # List of Word-labels
         self.word_labels = []  # List of word-strings (wtoken_word_idx values are an
                                # indices into this list)
 
         # Word-indices
-        self.wtoken_word_idx = []  # list of word-indices for word-tokens
+        self.wtoken_word_idx = []  # List of word-indices for word-tokens
         self.wtoken_doc_idx = []  # List of document-indices for word-tokens
         self.n_word_tokens = 0
 

@@ -8,6 +8,7 @@ from os import mkdir
 from os.path import join, isdir
 
 import numpy as np
+import nibabel as nib
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
@@ -89,7 +90,7 @@ class Model(object):
         self.n_word_tokens = len(dataset.wtoken_word_idx)  # Number of word-tokens
         self.n_peak_tokens = len(dataset.ptoken_doc_idx)  # Number of peak-tokens
         self.n_word_labels = len(dataset.word_labels)  # Number of word-types
-        self.n_docs = len(np.unique(dataset.wtoken_doc_idx))  # Number of documents
+        self.n_docs = len(dataset.pmids)  # Number of documents
         self.n_peak_dims = dataset.n_peak_dims  # Dimensionality of peak_locs data
 
         #  --- Preallocate vectors of assignment indices
@@ -171,7 +172,6 @@ class Model(object):
         for i_peak_token in xrange(self.n_peak_tokens):
             # document -idx (d)
             doc = self.dataset.ptoken_doc_idx[i_peak_token]
-
             topic = self.peak_topic_idx[i_peak_token]  # peak-token -> topic assignment (y_i)
             region = self.peak_region_idx[i_peak_token]  # peak-token -> subregion assignment (c_i)
             self.n_peak_tokens_doc_by_topic[doc, topic] += 1  # Increment document-by-topic
@@ -242,7 +242,7 @@ class Model(object):
             if verbose > 1:
                 print('Iter {0:02d}: Computing log-likelihood'.format(self.iter))
             self._compute_log_likelihood(self.dataset)  # Compute log-likelihood of
-                                                       # model in current state
+                                                        # model in current state
             if verbose > 0:
                 print('Iter {0:02d} Log-likely: x = {1:10.1f}, w = {2:10.1f}, '
                       'tot = {3:10.1f}'.format(self.iter, self.loglikely_x[-1],
@@ -687,6 +687,27 @@ class Model(object):
     # <<<<< Export Methods >>>>> Print Topics, Model parameters, and Figures to file |
     # --------------------------------------------------------------------------------
 
+    def get_spatial_probs(self):
+        """
+        Get conditional probability of selecting each voxel in the brain mask
+        given each topic.
+        """
+        masker = self.dataset.masker
+        affine = masker.volume.affine
+        mask_ijk = np.vstack(np.where(masker.volume.get_data() > 0)).T
+        mask_xyz = nib.affines.apply_affine(affine, mask_ijk)
+
+        p_topic_g_voxel = np.zeros((mask_xyz.shape[0], self.n_topics), int)
+        for i_topic in range(self.n_topics):
+            for j_region in range(self.n_regions):
+                pdf = multivariate_normal.pdf(mask_xyz,
+                                              mean=self.regions_mu[i_topic][j_region][0],
+                                              cov=self.regions_sigma[i_topic][j_region])
+                p_topic_g_voxel[:, i_topic] += pdf
+        p_topic_g_voxel /= np.sum(p_topic_g_voxel, axis=1)
+        p_topic_g_voxel = np.nan_to_num(p_topic_g_voxel, 0)
+        return p_topic_g_voxel
+
     def print_all_model_params(self, outputdir):
         """
         Run all export-methods: calls all print-methods to export parameters to files
@@ -784,7 +805,7 @@ class Model(object):
                 for j_topic in range(self.n_topics):
                     # Print the kth word in topic t and it's probability
                     fid.write('{0},{1:.4f},'.format(self.dataset.word_labels[rnk_idx[i, j_topic]],
-                                                                             rnk_vals[i, j_topic]))
+                                                    rnk_vals[i, j_topic]))
                 fid.write('\n')
 
     def print_topic_figures(self, outputdir, backgroundpeakfreq=10):
