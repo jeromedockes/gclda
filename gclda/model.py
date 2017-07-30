@@ -698,16 +698,19 @@ class Model(object):
         mask_ijk = np.vstack(np.where(masker.volume.get_data() > 0)).T
         mask_xyz = nib.affines.apply_affine(affine, mask_ijk)
 
-        p_topic_g_voxel = np.zeros((mask_xyz.shape[0], self.n_topics), float)
+        spatial_dists = np.zeros((mask_xyz.shape[0], self.n_topics), float)
         for i_topic in range(self.n_topics):
             for j_region in range(self.n_regions):
                 pdf = multivariate_normal.pdf(mask_xyz,
                                               mean=self.regions_mu[i_topic][j_region][0],
                                               cov=self.regions_sigma[i_topic][j_region])
-                p_topic_g_voxel[:, i_topic] += pdf
-        p_topic_g_voxel /= np.sum(p_topic_g_voxel, axis=1)[:, None]
-        p_topic_g_voxel = np.nan_to_num(p_topic_g_voxel, 0)
-        return p_topic_g_voxel
+                spatial_dists[:, i_topic] += pdf
+        p_topic_g_voxel = spatial_dists / np.sum(spatial_dists, axis=1)[:, None]
+        p_topic_g_voxel = np.nan_to_num(p_topic_g_voxel, 0)  # might be unnecessary
+
+        p_voxel_g_topic = spatial_dists / np.sum(spatial_dists, axis=0)[None, :]
+        p_voxel_g_topic = np.nan_to_num(p_voxel_g_topic, 0)  # might be unnecessary
+        return p_topic_g_voxel, p_voxel_g_topic
 
     def save(self, filename):
         """
@@ -847,6 +850,7 @@ class Model(object):
         # ^^ This would need to be changed for handling different data-types
         opts_axlims = [[-75, 75], [-110, 90], [-60, 80]]
         regioncolors = ['r', 'b', 'm', 'g', 'c', 'b']
+        
         # Get a subset of values to use as background (to illustrate extent of
         # all peaks)
         backgroundvals = self.dataset.peak_vals[range(1, len(self.dataset.peak_vals)-1,

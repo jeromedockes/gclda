@@ -8,8 +8,9 @@ from .dataset import Dataset
 from .model import Model
 from .decode import Decoder
 from .version import __version__
-
 from .due import due, Doi, BibTeX
+
+__all__ = ['dataset', 'model', 'decode', 'utils']
 
 # Citation for the algorithm.
 due.cite(BibTeX('@incollection{NIPS2016_6274,'\

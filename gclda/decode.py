@@ -7,6 +7,7 @@ from __future__ import print_function, division
 
 import numpy as np
 import pandas as pd
+import nibabel as nib
 from sklearn.feature_extraction.text import CountVectorizer
 
 from .due import due, BibTeX
@@ -51,13 +52,11 @@ class Decoder(object):
         4.  The resulting vector (tau_t*p_word_g_topic) should be word weights
             for your selected studies.
         """
-        model = self.model
-
         # Load ROI file and get ROI voxels
-        roi_arr = model.dataset.masker.mask(roi_file)
+        roi_arr = self.model.dataset.masker.mask(roi_file)
         roi_voxels = np.where(roi_arr > 0)[0]
 
-        p_topic_g_voxel = model.get_spatial_probs()
+        p_topic_g_voxel, _ = self.model.get_spatial_probs()
         p_topic_g_roi = p_topic_g_voxel[roi_voxels, :]  # p(T|V) for voxels in ROI only
         topic_weights = np.sum(p_topic_g_roi, axis=0)  # Sum across words
         if topic_priors is not None:
@@ -65,12 +64,12 @@ class Decoder(object):
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
-        n_word_tokens_per_topic = np.sum(model.n_word_tokens_word_by_topic, axis=0)
-        p_word_g_topic = model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
+        n_word_tokens_per_topic = np.sum(self.model.n_word_tokens_word_by_topic, axis=0)
+        p_word_g_topic = self.model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
         p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
         word_weights = np.dot(p_word_g_topic, topic_weights)
 
-        decoded_df = pd.DataFrame(index=model.dataset.word_labels, columns=['Weight'],
+        decoded_df = pd.DataFrame(index=self.model.dataset.word_labels, columns=['Weight'],
                                   data=word_weights)
         decoded_df.index.name = 'Term'
         return decoded_df
@@ -88,29 +87,27 @@ class Decoder(object):
             for your map, but the values are scaled based on the input image, so
             they won't necessarily mean much.
         """
-        model = self.model
-
         # Load image file and get voxel values
         input_values = self.dataset.masker.mask(image)
 
-        p_topic_g_voxel = model.get_spatial_probs()
+        p_topic_g_voxel, _ = self.model.get_spatial_probs()
         topic_weights = np.dot(p_topic_g_voxel.T, input_values[:, None])
         if topic_priors is not None:
             topic_weights *= topic_priors[:, None]
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
-        n_word_tokens_per_topic = np.sum(model.n_word_tokens_word_by_topic, axis=0)
-        p_word_g_topic = model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
+        n_word_tokens_per_topic = np.sum(self.model.n_word_tokens_word_by_topic, axis=0)
+        p_word_g_topic = self.model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
         p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
         word_weights = np.dot(p_word_g_topic, topic_weights)
 
-        decoded_df = pd.DataFrame(index=model.dataset.word_labels, columns=['Weight'],
+        decoded_df = pd.DataFrame(index=self.model.dataset.word_labels, columns=['Weight'],
                                   data=word_weights)
         decoded_df.index.name = 'Term'
         return decoded_df
 
-    def encode(self, text, topic_priors=None):
+    def encode(self, text, out_file=None, topic_priors=None):
         """
         Perform text-to-image encoding.
 
@@ -125,19 +122,16 @@ class Decoder(object):
         4.  The resulting map (tau_t*A) is the encoded image. Values are *not*
             probabilities.
         """
-        model = self.model
-        word_labels = model.dataset.word_labels
-        vectorizer = CountVectorizer(vocabulary=word_labels)
-        word_counts = np.squeeze(vectorizer.fit_transform([text]).toarray())
-        keep_idx = np.where(word_counts)[0]
+        if isinstance(text, list):
+            text = ' '.join(text.join)
 
+        vectorizer = CountVectorizer(vocabulary=self.model.dataset.word_labels)
+        word_counts = np.squeeze(vectorizer.fit_transform([text]).toarray())
+        keep_idx = np.where(word_counts > 0)[0]
         text_counts = word_counts[keep_idx]
 
-        n_topics_per_word_token = np.sum(model.n_word_tokens_word_by_topic, axis=1)
-
-        #p_word_g_topic = self.model.n_word_tokens_word_by_topic / n_word_tokens_per_topic[None, :]
-        #p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
-        p_topic_g_word = model.n_word_tokens_word_by_topic / n_topics_per_word_token[:, None]
+        n_topics_per_word_token = np.sum(self.model.n_word_tokens_word_by_topic, axis=1)
+        p_topic_g_word = self.model.n_word_tokens_word_by_topic / n_topics_per_word_token[:, None]
         p_topic_g_word = np.nan_to_num(p_topic_g_word, 0)
         p_topic_g_text = p_topic_g_word[keep_idx]  # p(T|W) for words in text only
         prod = p_topic_g_text * text_counts[:, None]  # Multiply p(T|W) by words in text
@@ -146,10 +140,11 @@ class Decoder(object):
             topic_weights *= topic_priors
 
         topic_weights /= np.sum(topic_weights)  # tau_t
+        _, p_voxel_g_topic = self.model.get_spatial_probs()
+        voxel_weights = np.dot(p_voxel_g_topic, topic_weights)
+        voxel_weights_matrix = self.model.dataset.masker.unmask(voxel_weights)
 
-        #n_topics = self.model.n_topics
-        #p_word_g_topic = self.model.p_word_g_topic
-        #p_text = np.sum(p_word_g_topic, axis=1)
-        #p_topic_g_text = (p_word_g_topic * p_topic) / p_text
-
-        #topic_weight_vec = np.sum(p_topic_g_word, axis=1)
+        if out_file is not None:
+            img = nib.Nifti1Image(voxel_weights_matrix, self.model.dataset.masker.volume.affine)
+            img.to_filename(out_file)
+        return voxel_weights_matrix
