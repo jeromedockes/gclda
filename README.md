@@ -31,7 +31,7 @@ The classes needed to run a gclda model can then be imported into python using:
 	> from gclda.model import Model
 
 
-## Summary of python_gclda package
+## Summary of gclda package
 
 The repository consists of:
 
@@ -94,6 +94,6 @@ To reference any of the datasets contained in this repository, or Neurosynth its
 
 - Tal Yarkoni, Russell A. Poldrack, Thomas E. Nichols, David C. Van Essen, and Tor D. Wager. "Large-scale automated synthesis of human functional neuroimaging data." Nature methods 8, no. 8 (2011): 665-670.
 
-Additionally, the complete Neurosynth datasets can be accessed at http://github.com/neurosynth/neurosynth-data (note however that those datasets need to be reformatted in order to make them work with the python_gclda package)
+Additionally, the complete Neurosynth datasets can be accessed at http://github.com/neurosynth/neurosynth-data (note however that those datasets need to be reformatted in order to make them work with the gclda package)
 
 For additional details about Neurosynth please visit [neurosynth.org](http://neurosynth.org/)

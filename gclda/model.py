@@ -629,7 +629,7 @@ class Model(object):
                 peak_probs[:, i_topic, j_region] = pdf
         return peak_probs
 
-    def mnpdf_proportional(self, x, p):
+    def _mnpdf_proportional(self, x, p):
         """
         Compute proportional multinomial probabilities of sampling observations
         x from all multinomial probability distribution rows p.
@@ -850,7 +850,7 @@ class Model(object):
         # ^^ This would need to be changed for handling different data-types
         opts_axlims = [[-75, 75], [-110, 90], [-60, 80]]
         regioncolors = ['r', 'b', 'm', 'g', 'c', 'b']
-        
+
         # Get a subset of values to use as background (to illustrate extent of
         # all peaks)
         backgroundvals = self.dataset.peak_vals[range(1, len(self.dataset.peak_vals)-1,
