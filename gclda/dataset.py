@@ -16,8 +16,54 @@ from neurosynth.base.mask import Masker
 
 def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
                       counts_file=None, abstracts_file=None, email=None):
-    """
-    Transform Neurosynth's data into gcLDA-compatible files.
+    """Transform Neurosynth's data into gcLDA-compatible files.
+
+    This function produces four files (word_indices.txt, word_labels.txt,
+    peak_indices.txt, and pmids.txt) in a specified folder
+    ({out_dir}/{dataset_label}), using data from a Neurosynth dataset and
+    associated abstracts. These four files are necessary for creating a Dataset
+    instance and running gcLDA.
+
+    Parameters
+    ----------
+    neurosynth_dataset :
+        A Neurosynth Dataset object containing data needed by gcLDA.
+
+    dataset_label : str
+        The name of the gcLDA dataset to be created. A folder will be created in
+        `out_dir` named after the dataset and output files will be saved there.
+
+    out_dir : str, optional
+        Output directory. Parent folder of a new folder named after
+        `dataset_label` where output files will be saved. By default, it uses
+        the current directory.
+
+    counts_file : str, optional
+        A tab-delimited text file containing feature counts for the dataset.
+        The first column is 'pmid', used for identifying articles. Other columns
+        are features (e.g., unigrams and bigrams from Neurosynth), where each
+        value is the number of times the feature is found in a given article.
+        This file is different from the features.txt file provided by
+        Neurosynth, as it should contain counts instead of tf-idf frequencies,
+        but it should have the same format. Only one of `counts_file`,
+        `abstracts_file`, and `email` needs to be specified.
+
+    abstracts_file : str, optional
+        A csv file containing abstracts of articles in the database. The first
+        column is 'pmid', used for identifying articles. The second column is
+        'abstract' and contains the article's abstract. The `abstracts_file` can
+        be created using `download_abstracts` in the Neurosynth Python package.
+        Only one of `counts_file`, `abstracts_file`, and `email` needs to be
+        specified.
+
+    email : str, optional
+        A valid email address. If neither `counts_file` or `abstracts_file` is
+        provided, then `import_neurosynth` will attempt to download article
+        abstracts using Neurosynth's `download_abstracts` function. This calls
+        PubMed to get PMIDs and abstracts, which requires an email address.
+        Only one of `counts_file`, `abstracts_file`, and `email` needs to be
+        specified.
+
     """
     dataset_dir = join(out_dir, dataset_label)
     if not isdir(dataset_dir):
@@ -101,73 +147,93 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
 
 class Dataset(object):
     """
-    Class object for a gcLDA dataset
+    Class object for a gcLDA dataset.
+
+    A Dataset contains data needed to run gcLDA models. It can also be used to
+    view dataset information and can be saved to a pickled file.
+
+    Parameters
+    ----------
+    dataset_label : str
+        The name of the gcLDA dataset. Also the name of a subfolder in
+        `data_directory` containing four files (word_indices.txt,
+        word_labels.txt, peak_indices.txt, and pmids.txt) with the data needed
+        to create the dataset.
+
+    data_directory : str
+        The path to the folder containing the data. Should contain a
+        subdirectory named after `dataset_label` with files needed to generate
+        a Dataset.
+
+    mask_file : str, optional
+        A brain mask file used to define the voxels included in the dataset. If
+        not provided, the mask file used by Neurosynth will be used by default.
+
+    Attributes
+    ----------
+    dataset_label : str
+        The name of the dataset.
+
+    masker : :obj:`neurosynth.base.mask.Masker`
+        A Neurosynth Masker object used for masking and unmasking voxels
+        according to a binary brain mask in stereotactic space.
+
+    word_labels : :obj:`list` of :obj:`str`
+        List of word-strings (wtoken_word_idx values are indices into this
+        list).
+
+    pmids : :obj:`list` of :obj:`numpy.int64`
+        List of PubMed IDs (i.e., studies) in dataset.
+
+    wtoken_doc_idx : :obj:`list` of :obj:`numpy.int64`
+        List of document-indices for word-tokens.
+
+    wtoken_word_idx : :obj:`list` of :obj:`numpy.int64`
+        List of word-indices for word-tokens.
+
+    ptoken_doc_idx : :obj:`list` of :obj:`numpy.int64`
+        List of document-indices for peak-tokens x.
+
+    peak_vals : :obj:`numpy.ndarray` of :obj:`numpy.int64`
+        A focus-x-3 array of X, Y, and Z coordinates of foci in dataset in
+        stereotactic (generally MNI152) space.
+
+
     """
 
     def __init__(self, dataset_label, data_directory, mask_file=None):
-        """
-        Class object for a gcLDA dataset
-        """
         # Dataset Info
         self.dataset_label = dataset_label
-        self.data_directory = data_directory
 
         if mask_file is None:
             resource_dir = get_resource_path()
             mask_file = join(resource_dir, 'MNI152_T1_2mm_brain.nii.gz')
         self.masker = Masker(mask_file)
 
-        # List of Word-labels
-        self.word_labels = []  # List of word-strings (wtoken_word_idx values are an
-                               # indices into this list)
-
-        # Word-indices
-        self.wtoken_word_idx = []  # List of word-indices for word-tokens
-        self.wtoken_doc_idx = []  # List of document-indices for word-tokens
-        self.n_word_tokens = 0
-
-        # Peak-indices
-        self.ptoken_doc_idx = []  # List of document-indices for peak-tokens x
-
-        # Matrix with values for each peak token x
-        self.peak_vals = np.ndarray(shape=(0, 0), dtype=int)
-        self.n_peak_tokens = 0  # Number of peak tokens (x)
-        self.n_peak_dims = 0  # Dimensionality of x data
-
-        # Document info (pmid)
-        self.pmids = []
-
-    # -------------------------------------------------------------------
-    #  Functions for importing raw data from files into dataset object
-    # -------------------------------------------------------------------
-
-    def import_data(self):
-        """
-        Import all data into the dataset object
-        """
         # Import all word-labels into a list
-        wlabels_file = join(self.data_directory, self.dataset_label, 'word_labels.txt')
+        wlabels_file = join(data_directory, self.dataset_label, 'word_labels.txt')
         wlabels_df = pd.read_csv(wlabels_file, sep='\t')
-        self.word_labels = wlabels_df['word_label'].tolist()
+        self.word_labels = wlabels_df['word_label'].tolist()  # List of word-strings
+                                                              # (wtoken_word_idx values are
+                                                              # indices into this list)
 
         # Import all document-pmids into a list
-        pmids_file = join(self.data_directory, self.dataset_label, 'pmids.txt')
+        pmids_file = join(data_directory, self.dataset_label, 'pmids.txt')
         pmids_df = pd.read_csv(pmids_file, sep='\t')
         self.pmids = pmids_df['pmid'].tolist()
 
         # Import all word-indices into a wtoken_word_idx and wtoken_doc_idx vector
-        widx_file = join(self.data_directory, self.dataset_label, 'word_indices.txt')
+        widx_file = join(data_directory, self.dataset_label, 'word_indices.txt')
         widx_df = pd.read_csv(widx_file, sep='\t')
-        self.wtoken_doc_idx = widx_df['docidx'].tolist()
-        self.wtoken_word_idx = widx_df['widx'].tolist()
-        self.n_word_tokens = len(self.wtoken_word_idx)
+        self.wtoken_doc_idx = widx_df['docidx'].tolist()  # List of document-indices for word-tokens
+        self.wtoken_word_idx = widx_df['widx'].tolist()  # List of word-indices for word-tokens
 
         # Import all peak-indices into lists
-        pidx_file = join(self.data_directory, self.dataset_label, 'peak_indices.txt')
+        pidx_file = join(data_directory, self.dataset_label, 'peak_indices.txt')
         pidx_df = pd.read_csv(pidx_file, sep='\t')
-        self.ptoken_doc_idx = pidx_df['docidx'].tolist()
+        self.ptoken_doc_idx = pidx_df['docidx'].tolist()  # List of document-indices for
+                                                          # peak-tokens x
         self.peak_vals = pidx_df[['x', 'y', 'z']].values
-        self.n_peak_tokens, self.n_peak_dims = self.peak_vals.shape
 
     def save(self, filename):
         """
@@ -209,20 +275,19 @@ class Dataset(object):
 
     def display_dataset_summary(self):
         """
-        View dataset summary
+        View dataset summary.
         """
         print('--- Dataset Summary ---')
         print('self.dataset_label  = {0!r}'.format(self.dataset_label))
-        print('self.data_directory = {0!r}'.format(self.data_directory))
         print('\tword-types:   {0}'.format(len(self.word_labels)))
-        print('\tword-indices: {0}'.format(self.n_word_tokens))
-        print('\tpeak-indices: {0}'.format(self.n_peak_tokens))
+        print('\tword-indices: {0}'.format(len(self.wtoken_word_idx)))
+        print('\tpeak-indices: {0}'.format(self.peak_vals.shape[0]))
         print('\tdocuments:    {0}'.format(len(self.pmids)))
-        print('\tpeak-dims:    {0}'.format(self.n_peak_dims))
+        print('\tpeak-dims:    {0}'.format(self.peak_vals.shape[1]))
 
     def view_word_labels(self, n_word_labels=1000):
         """
-        View word labels
+        View first `n_word_labels` words in dataset.
         """
         print('First {0} word_labels:'.format(n_word_labels))
         for i in range(min(n_word_labels, len(self.word_labels))):
@@ -232,7 +297,7 @@ class Dataset(object):
 
     def view_doc_labels(self, n_pmids=1000):
         """
-        View doclabels
+        View first `n_pmids` PMIDs in dataset.
         """
         print('First {0} pmids:'.format(n_pmids))
         for i in range(min(n_pmids, len(self.pmids))):
@@ -242,7 +307,7 @@ class Dataset(object):
 
     def view_word_indices(self, n_word_indices=100):
         """
-        View N wordindices
+        View first `n_word_indices` word indices.
         """
         print('First {0} wtoken_doc_idx, wtoken_word_idx:'.format(n_word_indices))
         for i in range(min(n_word_indices, len(self.wtoken_word_idx))):
@@ -252,7 +317,7 @@ class Dataset(object):
 
     def view_peak_indices(self, n_peak_indices=100):
         """
-        View N peak
+        View first `n_peak_indices` peak indices.
         """
         print('Peak Locs Dimensions: {0}'.format(self.peak_vals.shape))
         print('First {0} ptoken_doc_idx, peak_x, peak_y, peak_z:'.format(n_peak_indices))
@@ -265,5 +330,4 @@ if __name__ == '__main__':
     print('Calling dataset.py as a script')
 
     GC_DATA = Dataset('2015Filtered2_1000docs', '../datasets/neurosynth/')
-    GC_DATA.import_data()
     GC_DATA.display_dataset_summary()
