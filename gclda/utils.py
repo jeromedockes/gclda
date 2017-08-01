@@ -46,12 +46,15 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
         sagittal).
 
     """
-    template_image = underlay.get_data().astype(float)
+    template_data = underlay.get_data().astype(float)
+    if data.shape != template_data.shape:
+        raise Exception('Input dimensions {0} do not match template '
+                        'dimensions {1}.'.format(data.shape, template_data.shape))
 
-    ijk_extrema = np.vstack((np.array([0, 0, 0]), np.array(template_image.shape)))
+    ijk_extrema = np.vstack((np.array([0, 0, 0]), np.array(template_data.shape)))
     xyz_extrema = nib.affines.apply_affine(underlay.affine, ijk_extrema).astype(int)
 
-    template_image[template_image == 0] = np.nan
+    template_data[template_data == 0] = np.nan
     data[data == 0] = np.nan
 
     show_i, show_j, show_k = nib.affines.apply_affine(npl.inv(underlay.affine),
@@ -60,7 +63,7 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
     fig = plt.figure(figsize=(10, 10), dpi=200)
 
     ax1 = fig.add_subplot(221)
-    ax1.imshow(np.rot90(template_image[:, show_j, :], k=1), 'gray',
+    ax1.imshow(np.rot90(template_data[:, show_j, :], k=1), 'gray',
                extent=[xyz_extrema[0, 0], xyz_extrema[1, 0],
                        xyz_extrema[0, 2], xyz_extrema[1, 2]])
     ax1.imshow(np.rot90(data[:, show_j, :], k=1), alpha=0.7,
@@ -75,7 +78,7 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
     ax1.set_title('Coronal View: Y = {0}'.format(y))
 
     ax2 = fig.add_subplot(222)
-    ax2.imshow(np.rot90(template_image[show_i, :, :], k=1), 'gray',
+    ax2.imshow(np.rot90(template_data[show_i, :, :], k=1), 'gray',
                extent=[xyz_extrema[0, 1], xyz_extrema[1, 1],
                        xyz_extrema[0, 2], xyz_extrema[1, 2]])
     ax2.imshow(np.rot90(data[show_i, :, :], k=1), alpha=0.7,
@@ -90,7 +93,7 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
     ax2.set_title('Sagittal View: X = {0}'.format(x))
 
     ax3 = fig.add_subplot(223)
-    ax3.imshow(np.rot90(template_image[:, :, show_k], k=1), 'gray',
+    ax3.imshow(np.rot90(template_data[:, :, show_k], k=1), 'gray',
                extent=[xyz_extrema[0, 0], xyz_extrema[1, 0],
                        xyz_extrema[0, 1], xyz_extrema[1, 1]])
     ax3.imshow(np.rot90(data[:, :, show_k], k=1), alpha=0.7,
