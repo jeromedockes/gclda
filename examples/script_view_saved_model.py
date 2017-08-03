@@ -1,6 +1,9 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
 from python_gclda_package.gclda_dataset import gclda_dataset
 from python_gclda_package.gclda_model   import gclda_model
-import cPickle as pickle
+import pickle as pickle
 import gzip
 
 # ------------------------------------------------------
@@ -37,7 +40,7 @@ results_outputdir = '%s/%s' % (results_rootdir, model_str)
 results_modelfile = '%s/results_iter%02d.p' % (results_outputdir, current_iter)
 
 # Load compressed model object
-print 'loading model'
+print('loading model')
 with gzip.open(results_modelfile,'rb') as f:
 	model = pickle.load(f)
 model.displayModelSummary()

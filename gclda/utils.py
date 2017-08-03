@@ -5,6 +5,7 @@ Utility functions.
 """
 from __future__ import print_function, division
 
+from builtins import range
 import numpy as np
 import numpy.linalg as npl
 import nibabel as nib
@@ -72,9 +73,9 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
     ax1.set_xlabel('X')
     ax1.set_ylabel('Z')
     ax1.set_xlim((-80, 80))
-    ax1.set_xticks(range(-80, 81, 20))
+    ax1.set_xticks(list(range(-80, 81, 20)))
     ax1.set_ylim((-60, 90))
-    ax1.set_yticks(range(-60, 91, 15))
+    ax1.set_yticks(list(range(-60, 91, 15)))
     ax1.set_title('Coronal View: Y = {0}'.format(y))
 
     ax2 = fig.add_subplot(222)
@@ -87,9 +88,9 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
     ax2.set_xlabel('Y')
     ax2.set_ylabel('Z')
     ax2.set_xlim((-110, 80))
-    ax2.set_xticks(range(-110, 81, 20))
+    ax2.set_xticks(list(range(-110, 81, 20)))
     ax2.set_ylim((-75, 90))
-    ax2.set_yticks(range(-75, 91, 15))
+    ax2.set_yticks(list(range(-75, 91, 15)))
     ax2.set_title('Sagittal View: X = {0}'.format(x))
 
     ax3 = fig.add_subplot(223)
@@ -102,8 +103,8 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
     ax3.set_xlabel('X')
     ax3.set_ylabel('Y')
     ax3.set_xlim((-80, 80))
-    ax3.set_yticks(range(-80, 81, 20))
+    ax3.set_yticks(list(range(-80, 81, 20)))
     ax3.set_ylim((-110, 80))
-    ax3.set_yticks(range(-110, 81, 20))
+    ax3.set_yticks(list(range(-110, 81, 20)))
     ax3.set_title('Axial View: Z = {0}'.format(z))
     return fig

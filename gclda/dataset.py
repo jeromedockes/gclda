@@ -4,9 +4,13 @@
 Class and functions for dataset-related stuff.
 """
 from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 from os import mkdir
 from os.path import join, isfile, isdir
-import cPickle as pickle
+import pickle as pickle
 
 import numpy as np
 import pandas as pd

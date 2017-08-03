@@ -4,9 +4,13 @@
 Class and functions for model-related stuff.
 """
 from __future__ import print_function, division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 from os import mkdir
 from os.path import join, isdir
-import cPickle as pickle
+import pickle as pickle
 
 import numpy as np
 import nibabel as nib
@@ -179,10 +183,10 @@ class Model(object):
         #   regions_sigma = (n_topics, n_regions, n_peak_dims, n_peak_dims)
         self.regions_mu = []
         self.regions_sigma = []
-        for i_topic in xrange(self.n_topics):
+        for i_topic in range(self.n_topics):
             topic_mu = []
             topic_sigma = []
-            for j_region in xrange(self.n_regions):
+            for j_region in range(self.n_regions):
                 topic_mu.append(np.zeros(shape=(1, self.n_peak_dims)))
                 topic_sigma.append(np.zeros(shape=(self.n_peak_dims, self.n_peak_dims)))
             self.regions_mu.append(topic_mu)  # (\mu^{(t)}_r)
@@ -220,7 +224,7 @@ class Model(object):
             self.peak_region_idx[:] = (self.dataset.peak_vals[:, 0] > 0).astype(int)
 
         # Update model vectors and count matrices to reflect y and r assignments
-        for i_peak_token in xrange(self.n_peak_tokens):
+        for i_peak_token in range(self.n_peak_tokens):
             # document -idx (d)
             doc = self.dataset.ptoken_doc_idx[i_peak_token]
             topic = self.peak_topic_idx[i_peak_token]  # peak-token -> topic assignment (y_i)
@@ -231,7 +235,7 @@ class Model(object):
 
         # --- Randomly Initialize Word->Topic Assignments (z) for each word
         # token w_i: sample z_i proportional to p(topic|doc_i)
-        for i_word_token in xrange(len(self.dataset.wtoken_word_idx)):
+        for i_word_token in range(len(self.dataset.wtoken_word_idx)):
             # w_i word-type
             word = self.dataset.wtoken_word_idx[i_word_token]
 
@@ -1016,8 +1020,8 @@ class Model(object):
 
         # Get a subset of values to use as background (to illustrate extent of
         # all peaks)
-        backgroundvals = self.dataset.peak_vals[range(1, len(self.dataset.peak_vals)-1,
-                                                      backgroundpeakfreq), :]
+        backgroundvals = self.dataset.peak_vals[list(range(1, len(self.dataset.peak_vals)-1,
+                                                      backgroundpeakfreq)), :]
         backgroundvals = np.transpose(backgroundvals)
 
         # Loop over all topics and make a figure for each

@@ -16,6 +16,8 @@ Copyright:  2015-2016  DueCredit developers
 License:    BSD-2
 """
 
+from builtins import str
+from builtins import object
 __version__ = '0.0.5'
 
 

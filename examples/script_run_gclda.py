@@ -6,10 +6,13 @@ It will save a compressed model to disk every so often, in case program needs
 to be halted and later resumed.
 """
 from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 import os
 from os.path import join
 import gzip
-import cPickle as pickle
+import pickle as pickle
 
 from gclda.dataset import Dataset
 from gclda.model import Model
