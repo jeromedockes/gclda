@@ -4,10 +4,10 @@
 Tests for GC-LDA dataset module.
 """
 from shutil import rmtree
-from os import remove, rmdir
+from os import remove
 from os.path import join, isfile
 
-from neurosynth.base.dataset import Dataset as NeurosynthDataset
+import neurosynth
 from gclda.dataset import Dataset
 from gclda.tests.utils import get_test_data_path
 
@@ -20,7 +20,7 @@ def test_import_from_counts():
     ns_dset_file = join(get_test_data_path(), 'neurosynth_dataset.pkl')
     temp_dir = join(get_test_data_path(), 'temp')
 
-    ns_dset = NeurosynthDataset.load(ns_dset_file)
+    ns_dset = neurosynth.Dataset.load(ns_dset_file)
     import_neurosynth(ns_dset, 'temp', out_dir=get_test_data_path(),
                       counts_file=counts_file)
     files_found = [isfile(join(temp_dir, 'pmids.txt')),
@@ -41,7 +41,7 @@ def test_import_from_abstracts():
     ns_dset_file = join(get_test_data_path(), 'neurosynth_dataset.pkl')
     temp_dir = join(get_test_data_path(), 'temp')
 
-    ns_dset = NeurosynthDataset.load(ns_dset_file)
+    ns_dset = neurosynth.Dataset.load(ns_dset_file)
     import_neurosynth(ns_dset, temp_dir, out_dir=get_test_data_path(),
                       abstracts_file=abstracts_file)
     files_found = [isfile(join(temp_dir, 'pmids.txt')),
@@ -62,7 +62,7 @@ def test_import_from_email():
     ns_dset_file = join(get_test_data_path(), 'neurosynth_dataset.pkl')
     temp_dir = join(get_test_data_path(), 'temp')
 
-    ns_dset = NeurosynthDataset.load(ns_dset_file)
+    ns_dset = neurosynth.Dataset.load(ns_dset_file)
     import_neurosynth(ns_dset, 'temp', out_dir=get_test_data_path(),
                       email=email)
     files_found = [isfile(join(temp_dir, 'pmids.txt')),
