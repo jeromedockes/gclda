@@ -243,7 +243,7 @@ class Dataset(object):
         """
         Pickle the Dataset instance to the provided file.
         """
-        with open(filename, 'w') as fo:
+        with open(filename, 'wb') as fo:
             pickle.dump(self, fo)
 
     @classmethod
