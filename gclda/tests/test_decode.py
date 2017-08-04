@@ -45,7 +45,7 @@ def test_encode():
     """Acceptance test of test-to-image encoding.
     """
     model_file = join(get_test_data_path(), 'gclda_model.pkl')
-    text = 'painful stimulation during a language task'
+    text = 'anterior insula was analyzed'
     model = Model.load(model_file)
     decoder = Decoder(model)
     encoded_matrix = decoder.encode(text)
