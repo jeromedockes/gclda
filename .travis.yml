@@ -17,7 +17,7 @@ before_script:
 - sleep 3
 
 script:
-- py.test --cov-report term-missing --cov=python_gclda
+- py.test --cov-report term-missing --cov=gclda
 
 after_success:
 - coveralls
