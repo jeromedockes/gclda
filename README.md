@@ -2,6 +2,8 @@
 
 This is a Python implementation of the Generalized Correspondence-LDA model (gcLDA).
 
+[![Build Status](https://travis-ci.org/tsalo/python_gclda.svg?branch=mess-around)](https://travis-ci.org/tsalo/python_gclda) [![Coverage Status](https://coveralls.io/repos/github/tsalo/python_gclda/badge.svg?branch=mess-around)](https://coveralls.io/github/tsalo/python_gclda?branch=mess-around)
+
 ## Generalized Correspondence-LDA Model (GC-LDA)
 
 The gcLDA model is a generalization of the correspondence-LDA model (Blei & Jordan, 2003, "Modeling annotated data"), which is an unsupervised learning model used for modeling multiple data-types, where one data-type describes the other. The gcLDA model was introduced in the following paper:
