@@ -1,8 +1,8 @@
-# python_gclda
+# gclda
 
 This is a Python implementation of the Generalized Correspondence-LDA model (gcLDA).
 
-[![Build Status](https://travis-ci.org/tsalo/python_gclda.svg?branch=mess-around)](https://travis-ci.org/tsalo/python_gclda) [![Coverage Status](https://coveralls.io/repos/github/tsalo/python_gclda/badge.svg?branch=mess-around)](https://coveralls.io/github/tsalo/python_gclda?branch=mess-around)
+[![Build Status](https://travis-ci.org/tsalo/gclda.svg?branch=mess-around)](https://travis-ci.org/tsalo/gclda) [![Coverage Status](https://coveralls.io/repos/github/tsalo/gclda/badge.svg?branch=mess-around)](https://coveralls.io/github/tsalo/gclda?branch=mess-around)
 
 ## Generalized Correspondence-LDA Model (GC-LDA)
 
