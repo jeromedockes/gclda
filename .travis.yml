@@ -12,6 +12,7 @@ install:
 
 before_script:
 - python setup.py install
+- "echo backend : Agg > matplotlibrc"
 
 script:
 - py.test --cov-report term-missing --cov=python_gclda
