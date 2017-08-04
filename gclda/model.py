@@ -829,7 +829,7 @@ class Model(object):
             with open(filename, 'r') as fi:
                 dataset = pickle.load(fi, encoding='latin')
 
-        return model
+        return dataset
 
     def print_all_model_params(self, outputdir):
         """
