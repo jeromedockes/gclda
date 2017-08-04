@@ -34,11 +34,11 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
 
     y : int, optional
         Y-coordinate in stereotactic space to use for coronal view in figure.
-        Default is -18.
+        Default is 0.
 
     z : int, optional
         Z-coordinate in stereotactic space to use for axial view in figure.
-        Default is 18.
+        Default is 0.
 
     Returns
     -------

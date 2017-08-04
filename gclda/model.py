@@ -10,7 +10,7 @@ from builtins import range
 from builtins import object
 from os import mkdir
 from os.path import join, isdir
-import pickle as pickle
+import pickle
 
 import numpy as np
 import nibabel as nib
@@ -731,50 +731,6 @@ class Model(object):
                 peak_probs[:, i_topic, j_region] = pdf
         return peak_probs
 
-    def _mnpdf_proportional(self, x, p):
-        """
-        Compute proportional multinomial probabilities of sampling observations
-        x from all multinomial probability distribution rows p.
-        Note that this only returns values proportional to the true data-
-        likelihood (sampler only requires proportionality).
-
-        Appears unused.
-
-        Parameters
-        ----------
-        x : :obj:`numpy.ndarray` of :obj:`numpy.int64`
-            A 1-by-T vector of observation.
-
-        p : :obj:`numpy.ndarray` of :obj:`numpy.float32`
-            A T-by-T matrix, where each row is one of the updated proposal
-            distributions to y.
-
-        Returns
-        -------
-        y : :obj:`numpy.ndarray` of :obj:`numpy.float32`
-            A 1-by-T vector giving the proportional probability of sampling x
-            from each row of input y.
-        """
-        # First remove all columns for which we have no observations
-        # (dramatically speeds up computation)
-        x_pos = x > 0
-        x = x[x_pos]
-        p = p[:, x_pos]
-
-        # Now compute the probability sampling x from the row-probability vector
-        # (in log-space): product_i( p_i^(x_i) ), for all positive indices i
-        m, _ = np.shape(p)
-        x = np.dot(np.ones([m, 1]), x.reshape([1, len(x)]))
-        xlogp = x * np.log(p)  # pylint: disable=no-member
-
-        # Row-sums give total (proportional) of sampling vector x from rows of p
-        xlogp = np.sum(xlogp, axis=1)
-
-        # Exponentiate to convert from log-space
-        # Add a constant before exponentiating to avoid any underflow issues
-        y = np.exp(xlogp - np.max(xlogp))
-        return y
-
     def _compute_prop_multinomial_from_zy_vectors(self, z, y):
         """
         Compute proportional multinomial probabilities of current x vector given
@@ -865,13 +821,8 @@ class Model(object):
         filename : str
             Pickle file containing a saved Model instance.
         """
-        try:
-            with open(filename, 'r') as fi:
-                model = pickle.load(fi)
-        except UnicodeDecodeError:
-            # Need to try this for python3
-            with open(filename, 'r') as fi:
-                model = pickle.load(fi, encoding='latin')
+        with open(filename, 'r') as fi:
+            model = pickle.load(fi)
 
         return model
 
@@ -1018,10 +969,9 @@ class Model(object):
         opts_axlims = [[-75, 75], [-110, 90], [-60, 80]]
         regioncolors = ['r', 'b', 'm', 'g', 'c', 'b']
 
-        # Get a subset of values to use as background (to illustrate extent of
-        # all peaks)
+        # Get a subset of values to use as background (to illustrate extent of all peaks)
         backgroundvals = self.dataset.peak_vals[list(range(1, len(self.dataset.peak_vals)-1,
-                                                      backgroundpeakfreq)), :]
+                                                           backgroundpeakfreq)), :]
         backgroundvals = np.transpose(backgroundvals)
 
         # Loop over all topics and make a figure for each

@@ -10,7 +10,7 @@ from builtins import range
 from builtins import object
 from os import mkdir
 from os.path import join, isfile, isdir
-import pickle as pickle
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -251,13 +251,8 @@ class Dataset(object):
         """
         Load a pickled Dataset instance from file.
         """
-        try:
-            with open(filename, 'r') as fi:
-                dataset = pickle.load(fi)
-        except UnicodeDecodeError:
-            # Need to try this for python3
-            with open(filename, 'r') as fi:
-                dataset = pickle.load(fi, encoding='latin')
+        with open(filename, 'r') as fi:
+            dataset = pickle.load(fi)
 
         return dataset
 
