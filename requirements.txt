@@ -7,4 +7,3 @@ duecredit>=0.6.1
 nibabel>=2.1.0
 scikit_learn>=0.19b2
 future>=0.16.0
-neurosynth>=0.3.5
