@@ -808,7 +808,7 @@ class Model(object):
         filename : str
             Pickle file to write Model instance to.
         """
-        with open(filename, 'w') as fo:
+        with open(filename, 'wb') as fo:
             pickle.dump(self, fo)
 
     @classmethod
@@ -823,13 +823,13 @@ class Model(object):
         """
         try:
             with open(filename, 'rb') as fi:
-                dataset = pickle.load(fi)
+                model = pickle.load(fi)
         except UnicodeDecodeError:
             # Need to try this for python3
             with open(filename, 'rb') as fi:
-                dataset = pickle.load(fi, encoding='latin')
+                model = pickle.load(fi, encoding='latin')
 
-        return dataset
+        return model
 
     def print_all_model_params(self, outputdir):
         """
