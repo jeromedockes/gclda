@@ -251,8 +251,13 @@ class Dataset(object):
         """
         Load a pickled Dataset instance from file.
         """
-        with open(filename, 'r') as fi:
-            dataset = pickle.load(fi)
+        try:
+            with open(filename, 'r') as fi:
+                dataset = pickle.load(fi)
+        except UnicodeDecodeError:
+            # Need to try this for python3
+            with open(filename, 'r') as fi:
+                dataset = pickle.load(fi, encoding='latin')
 
         return dataset
 
