@@ -113,7 +113,7 @@ def test_save_dataset():
 
 
 def test_display_dataset_summary():
-    """Prints model information to the console.
+    """Prints dataset information to the console.
     """
     dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
     dset = Dataset.load(dataset_file)
@@ -121,6 +121,62 @@ def test_display_dataset_summary():
     captured_output = StringIO()  # Create StringIO object
     sys.stdout = captured_output  #  and redirect stdout.
     dset.display_dataset_summary()  # Call unchanged function.
+    sys.stdout = sys.__stdout__  # Reset redirect.
+
+    assert len(captured_output.getvalue()) > 0
+
+
+def test_view_word_labels():
+    """Prints dataset information to the console.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
+    dset = Dataset.load(dataset_file)
+
+    captured_output = StringIO()  # Create StringIO object
+    sys.stdout = captured_output  #  and redirect stdout.
+    dset.view_word_labels(n_word_labels=5)  # Call unchanged function.
+    sys.stdout = sys.__stdout__  # Reset redirect.
+
+    assert len(captured_output.getvalue()) > 0
+
+
+def test_view_doc_labels():
+    """Prints dataset information to the console.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
+    dset = Dataset.load(dataset_file)
+
+    captured_output = StringIO()  # Create StringIO object
+    sys.stdout = captured_output  #  and redirect stdout.
+    dset.view_doc_labels(n_pmids=10)  # Call unchanged function.
+    sys.stdout = sys.__stdout__  # Reset redirect.
+
+    assert len(captured_output.getvalue()) > 0
+
+
+def test_view_word_indices():
+    """Prints dataset information to the console.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
+    dset = Dataset.load(dataset_file)
+
+    captured_output = StringIO()  # Create StringIO object
+    sys.stdout = captured_output  #  and redirect stdout.
+    dset.view_word_indices(n_word_indices=5)  # Call unchanged function.
+    sys.stdout = sys.__stdout__  # Reset redirect.
+
+    assert len(captured_output.getvalue()) > 0
+
+
+def test_view_peak_indices():
+    """Prints dataset information to the console.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
+    dset = Dataset.load(dataset_file)
+
+    captured_output = StringIO()  # Create StringIO object
+    sys.stdout = captured_output  #  and redirect stdout.
+    dset.view_peak_indices(n_peak_indices=5)  # Call unchanged function.
     sys.stdout = sys.__stdout__  # Reset redirect.
 
     assert len(captured_output.getvalue()) > 0
