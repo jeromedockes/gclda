@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Package-specific
+example_results/
+examples/gclda_results/
+examples/gclda_tutorial_results/
+datasets/models/
