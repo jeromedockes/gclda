@@ -2,7 +2,9 @@
 
 This is a Python implementation of the Generalized Correspondence-LDA model (gcLDA).
 
-[![Build Status](https://travis-ci.org/tsalo/gclda.svg?branch=mess-around)](https://travis-ci.org/tsalo/gclda) [![Coverage Status](https://coveralls.io/repos/github/tsalo/gclda/badge.svg?branch=mess-around)](https://coveralls.io/github/tsalo/gclda?branch=mess-around)
+[![Build Status](https://travis-ci.org/tsalo/gclda.svg?branch=mess-around)](https://travis-ci.org/tsalo/gclda)
+[![Coverage Status](https://coveralls.io/repos/github/tsalo/gclda/badge.svg?branch=mess-around)](https://coveralls.io/github/tsalo/gclda?branch=mess-around)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Generalized Correspondence-LDA Model (GC-LDA)
 
@@ -96,6 +98,6 @@ To reference any of the datasets contained in this repository, or Neurosynth its
 
 - Tal Yarkoni, Russell A. Poldrack, Thomas E. Nichols, David C. Van Essen, and Tor D. Wager. "Large-scale automated synthesis of human functional neuroimaging data." Nature methods 8, no. 8 (2011): 665-670.
 
-Additionally, the complete Neurosynth datasets can be accessed at http://github.com/neurosynth/neurosynth-data (note however that those datasets need to be reformatted in order to make them work with the gclda package)
+Additionally, the complete Neurosynth datasets can be accessed at http://github.com/neurosynth/neurosynth-data (note however that those datasets need to be reformatted in order to make them work with the gclda package).
 
-For additional details about Neurosynth please visit [neurosynth.org](http://neurosynth.org/)
+For additional details about Neurosynth please visit [neurosynth.org](http://neurosynth.org/).
