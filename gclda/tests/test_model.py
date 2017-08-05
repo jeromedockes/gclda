@@ -3,6 +3,9 @@
 """
 Tests for GC-LDA model module.
 """
+import sys
+import StringIO
+from glob import glob
 from shutil import rmtree
 from os import remove
 from os.path import join, isfile
@@ -21,6 +24,32 @@ def test_init():
                   alpha=.1, beta=.01, gamma=.01, delta=1.,
                   dobs=25, roi_size=10., seed_init=1)
     assert isinstance(model, Model)
+
+
+def test_asymmetric():
+    """Test running a model with symmetric ROIs.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
+    dset = Dataset.load(dataset_file)
+    model = Model(dset, n_topics=50, n_regions=2, symmetric=False,
+                  alpha=.1, beta=.01, gamma=.01, delta=1.,
+                  dobs=25, roi_size=10., seed_init=1)
+    initial_iter = model.iter
+    model.run_complete_iteration()
+    assert model.iter == initial_iter + 1
+
+
+def test_symmetric():
+    """Test running a model with symmetric ROIs.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
+    dset = Dataset.load(dataset_file)
+    model = Model(dset, n_topics=50, n_regions=2, symmetric=True,
+                  alpha=.1, beta=.01, gamma=.01, delta=1.,
+                  dobs=25, roi_size=10., seed_init=1)
+    initial_iter = model.iter
+    model.run_complete_iteration()
+    assert model.iter == initial_iter + 1
 
 
 def test_run_iteration():
@@ -70,3 +99,31 @@ def test_print_all_model_params():
 
     # Perform cleanup
     rmtree(temp_dir)
+
+def test_print_topic_figures():
+    """Writes out images for topics.
+    """
+    model_file = join(get_test_data_path(), 'gclda_model.pkl')
+    temp_dir = join(get_test_data_path(), 'temp')
+
+    model = Model.load(model_file)
+    model.print_topic_figures(temp_dir, n_top_words=5)
+    figures = glob(join(temp_dir, '*.png'))
+    assert len(figures) == model.n_topics
+
+    # Perform cleanup
+    rmtree(temp_dir)
+
+
+def test_display_model_summary():
+    """Prints model information to the console.
+    """
+    model_file = join(get_test_data_path(), 'gclda_model.pkl')
+    model = Model.load(model_file)
+
+    captured_output = StringIO.StringIO()  # Create StringIO object
+    sys.stdout = captured_output  #  and redirect stdout.
+    model.display_model_summary()  # Call unchanged function.
+    sys.stdout = sys.__stdout__  # Reset redirect.
+
+    assert len(captured_output.getvalue()) > 0

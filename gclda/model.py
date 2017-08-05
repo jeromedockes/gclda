@@ -104,7 +104,7 @@ class Model(object):
                  alpha=.1, beta=.01, gamma=.01, delta=1.0,
                  dobs=25, roi_size=50.0, seed_init=1):
 
-        print('Constructing GC-LDA Model')
+        print('Constructing/Initializing GC-LDA Model')
 
         # --- Checking to make sure parameters are valid
         if (symmetric is True) and (n_regions != 2):
@@ -148,10 +148,17 @@ class Model(object):
         self.n_docs = len(self.dataset.pmids)  # Number of documents
         self.n_peak_dims = self.dataset.peak_vals.shape[1]  # Dimensionality of peak_locs data
 
+        # --- Seed random number generator
+        np.random.seed(self.seed_init)  # pylint: disable=no-member
+
         #  --- Preallocate vectors of assignment indices
         self.wtoken_topic_idx = np.zeros(len(self.dataset.wtoken_word_idx),
                                          dtype=int)  # word->topic assignments
-        self.peak_topic_idx = np.zeros(self.n_peak_tokens, dtype=int)  # peak->topic assignments
+
+        # --- Randomly initialize peak->topic assignments (y) ~ unif(1...n_topics)
+        self.peak_topic_idx = np.random.randint(self.n_topics,  # pylint: disable=no-member
+                                                size=(self.n_peak_tokens))
+
         self.peak_region_idx = np.zeros(self.n_peak_tokens, dtype=int)  # peak->region assignments
 
         #  --- Preallocate count matrices
@@ -198,20 +205,6 @@ class Model(object):
         self.loglikely_x = []  # Tracks log-likelihood of peak tokens
         self.loglikely_w = []  # Tracks log-likelihood of word tokens
         self.loglikely_tot = []  # Tracks log-likelihood of peak + word tokens
-
-    def initialize(self):
-        """
-        Random Initialization: Initial z, y, r assignments.
-        Get Initial Spatial Estimates
-        """
-        print('Initializing GC-LDA Model')
-
-        # --- Seed random number generator
-        np.random.seed(self.seed_init)  # pylint: disable=no-member
-
-        # --- Randomly initialize peak->topic assignments (y) ~ unif(1...n_topics)
-        self.peak_topic_idx[:] = np.random.randint(self.n_topics,  # pylint: disable=no-member
-                                                   size=(self.n_peak_tokens))
 
         # --- Initialize peak->subregion assignments (r)
         #   if asymmetric model, randomly sample r ~ unif(1...n_regions)
@@ -840,6 +833,10 @@ class Model(object):
         ----------
         outputdir : str
             The name of the output directory.
+
+        n_top_words : int, optional
+            The number of words associated with each topic to report in topic
+            word probabilities file.
         """
         # If output directory doesn't exist, make it
         if not isdir(outputdir):
@@ -951,7 +948,7 @@ class Model(object):
                                                     rnk_vals[i, j_topic]))
                 fid.write('\n')
 
-    def print_topic_figures(self, outputdir, backgroundpeakfreq=10):
+    def print_topic_figures(self, outputdir, backgroundpeakfreq=10, n_top_words=12):
         """
         Print Topic Figures: Spatial distributions and Linguistic distributions
         for top K words.
@@ -964,6 +961,9 @@ class Model(object):
         backgroundpeakfreq : int, optional
             Determines what proportion of peaks we show in the background of
             each figure. Default = 10.
+
+        n_top_words : int, optional
+            The number of words per topic to include in the figures. Default = 12.
         """
         # If output directory doesn't exist, make it
         if not isdir(outputdir):
@@ -988,7 +988,6 @@ class Model(object):
             fig = plt.figure(figsize=(10, 10), dpi=80)
 
             # <<<< Plot all points for topic from 3 different angles >>>>
-
             # --- REAR-VIEW: X-BY-Z
             ax1 = fig.add_subplot(221)
             ax1.axis('equal')
@@ -1046,9 +1045,7 @@ class Model(object):
             ax3.set_ylim(opts_axlims[1])
 
             # <<<< Print words & Region-probs >>>>
-
             # Get strings giving top K words and probs for the current topic
-            n_top_words = 12
             wprobs = self.n_word_tokens_word_by_topic[:, i_topic] + self.beta
             wprobs = wprobs / np.sum(wprobs)
             # Get rankings of words
