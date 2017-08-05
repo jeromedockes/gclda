@@ -4,11 +4,16 @@
 Tests for GC-LDA model module.
 """
 import sys
-import StringIO
 from glob import glob
 from shutil import rmtree
 from os import remove
 from os.path import join, isfile
+try:
+    # 2.7
+    from StringIO import StringIO
+except ImportError:
+    # 3+
+    from io import StringIO
 
 from gclda.model import Model
 from gclda.dataset import Dataset
@@ -121,7 +126,7 @@ def test_display_model_summary():
     model_file = join(get_test_data_path(), 'gclda_model.pkl')
     model = Model.load(model_file)
 
-    captured_output = StringIO.StringIO()  # Create StringIO object
+    captured_output = StringIO()  # Create StringIO object
     sys.stdout = captured_output  #  and redirect stdout.
     model.display_model_summary()  # Call unchanged function.
     sys.stdout = sys.__stdout__  # Reset redirect.
