@@ -3,9 +3,16 @@
 """
 Tests for GC-LDA dataset module.
 """
+import sys
 from shutil import rmtree
 from os import remove
 from os.path import join, isfile
+try:
+    # 2.7
+    from StringIO import StringIO
+except ImportError:
+    # 3+
+    from io import StringIO
 
 import neurosynth
 from gclda.dataset import Dataset
@@ -103,3 +110,17 @@ def test_save_dataset():
 
     # Perform cleanup
     remove(temp_file)
+
+
+def test_display_dataset_summary():
+    """Prints model information to the console.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
+    dset = Dataset.load(dataset_file)
+
+    captured_output = StringIO()  # Create StringIO object
+    sys.stdout = captured_output  #  and redirect stdout.
+    dset.display_dataset_summary()  # Call unchanged function.
+    sys.stdout = sys.__stdout__  # Reset redirect.
+
+    assert len(captured_output.getvalue()) > 0
