@@ -831,7 +831,7 @@ class Model(object):
 
         return model
 
-    def print_all_model_params(self, outputdir):
+    def print_all_model_params(self, outputdir, n_top_words=15):
         """
         Run all export-methods: calls all print-methods to export parameters to
         files.
@@ -847,7 +847,7 @@ class Model(object):
 
         # print topic-word distributions for top-K words in easy-to-read format
         outfilestr = join(outputdir, 'Topic_X_Word_Probs.csv')
-        self._print_topic_word_probs(outfilestr, 20)
+        self._print_topic_word_probs(outfilestr, n_top_words=n_top_words)
 
         # print topic x word count matrix: m.n_word_tokens_word_by_topic
         outfilestr = join(outputdir, 'Topic_X_Word_CountMatrix.csv')
@@ -938,7 +938,7 @@ class Model(object):
 
             # Print the topic-headers
             for i_topic in range(self.n_topics):
-                # Print each topic and it's marginal probability to columns
+                # Print each topic and its marginal probability to columns
                 fid.write('Topic_{0:02d},{1:.4f},'.format(i_topic+1,
                                                           topic_probs[i_topic]))
             fid.write('\n')
@@ -946,7 +946,7 @@ class Model(object):
             # Print the top K word-strings and word-probs for each topic
             for i in range(n_top_words):
                 for j_topic in range(self.n_topics):
-                    # Print the kth word in topic t and it's probability
+                    # Print the kth word in topic t and its probability
                     fid.write('{0},{1:.4f},'.format(self.dataset.word_labels[rnk_idx[i, j_topic]],
                                                     rnk_vals[i, j_topic]))
                 fid.write('\n')
