@@ -101,3 +101,10 @@ To reference any of the datasets contained in this repository, or Neurosynth its
 Additionally, the complete Neurosynth datasets can be accessed at http://github.com/neurosynth/neurosynth-data (note however that those datasets need to be reformatted in order to make them work with the gclda package).
 
 For additional details about Neurosynth please visit [neurosynth.org](http://neurosynth.org/).
+
+## Documentation
+To generate documentation files:
+```
+sphinx-apidoc --separate -M -f -o doc/source/ gclda/ gclda/due.py gclda/version.py gclda/tests/
+make html
+```

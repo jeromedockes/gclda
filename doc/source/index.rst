@@ -8,13 +8,13 @@ Welcome to gclda's documentation!
 
 .. automodule:: gclda
 
-Modules:
-
+Modules
+==================
 .. toctree::
-   dataset
-   model
-   decode
-
+   gclda.dataset
+   gclda.decode
+   gclda.model
+   gclda.utils
 
 Indices and tables
 ==================
