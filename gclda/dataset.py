@@ -89,9 +89,10 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
                                 'counts_file or abstracts_file are not.')
         else:
             abstracts_df = pd.read_csv(abstracts_file)
-        vectorizer = CountVectorizer(vocabulary=orig_vocab)
+        vectorizer = CountVectorizer(vocabulary=orig_vocab, ngram_range=(1, 2))
         weights = vectorizer.fit_transform(abstracts_df['abstract'].tolist()).toarray()
-        counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=orig_vocab,
+        new_vocab = [term.replace(' ', '_') for term in orig_vocab]
+        counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=new_vocab,
                                  data=weights)
         counts_df.to_csv(join(dataset_dir, 'feature_counts.txt'), sep='\t',
                          index_label='pmid')

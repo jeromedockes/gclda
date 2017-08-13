@@ -17,22 +17,22 @@ from gclda.model import Model
 from gclda.tests.utils import get_resource_path
 
 # Set up dataset label & load/save directories
-DATASET_LABEL = '20170728'
+DATASET_LABEL = '20170813'
 DATA_DIR = join(get_resource_path(), 'neurosynth/')
 
 # Root-directory where model results are saved
 OUT_DIR = join(get_resource_path(), 'models/')
 
 # Sampling parameters
-N_ITERS = 50  # Total iterations to run up to
-SAVE_FREQ = 1000  # How often we save a model object and topic-distributions to file
+N_ITERS = 1000  # Total iterations to run up to
+SAVE_FREQ = 100  # How often we save a model object and topic-distributions to file
 LOGLIKELY_FREQ = 100  # How often we compute log-likelihood (which slows training
                       # down a bit, but is useful for tracking model progress)
 VERBOSITY = 2  # How much information about sampler progress gets
                # printed to console (2 is max, 0 is min)
 
 # gcLDA model parameters
-N_TOPICS = 400	# Number of topics
+N_TOPICS = 200	# Number of topics
 N_REGIONS = 2  # Number of subregions (any positive integer, but must equal 2
                # if SYMMETRIC subregion model)
 ALPHA = .1 	# Prior count on topics for each doc
