@@ -19,7 +19,8 @@ from neurosynth.base.mask import Masker
 
 
 def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
-                      counts_file=None, abstracts_file=None, email=None):
+                      counts_file=None, abstracts_file=None, email=None,
+                      vocabulary=None):
     """Transform Neurosynth's data into gcLDA-compatible files.
 
     This function produces four files (word_indices.txt, word_labels.txt,
@@ -68,6 +69,11 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
         Only one of `counts_file`, `abstracts_file`, and `email` needs to be
         specified.
 
+    vocabulary : :obj:`list` of :obj:`str`, optional
+        A list of terms to use as the vocabulary for a dataset. Only works if
+        `abstracts_file` or `email address` is provided (but not if
+        `counts_file` is used).
+
     """
     dataset_dir = join(out_dir, dataset_label)
     if not isdir(dataset_dir):
@@ -89,7 +95,12 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
                                 'counts_file or abstracts_file are not.')
         else:
             abstracts_df = pd.read_csv(abstracts_file)
-        vectorizer = CountVectorizer(vocabulary=orig_vocab, ngram_range=(1, 2))
+
+        if vocabulary is not None:
+            max_len = max([len(term.split(' ')) for term in vocabulary])
+            vectorizer = CountVectorizer(vocabulary=vocabulary, ngram_range=(1, max_len))
+        else:
+            vectorizer = CountVectorizer(vocabulary=orig_vocab, ngram_range=(1, 2))
         weights = vectorizer.fit_transform(abstracts_df['abstract'].tolist()).toarray()
         new_vocab = [term.replace(' ', '_') for term in orig_vocab]
         counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=new_vocab,
