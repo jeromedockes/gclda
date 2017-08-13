@@ -99,10 +99,11 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
         if vocabulary is not None:
             max_len = max([len(term.split(' ')) for term in vocabulary])
             vectorizer = CountVectorizer(vocabulary=vocabulary, ngram_range=(1, max_len))
+            new_vocab = [term.replace(' ', '_') for term in vocabulary]
         else:
             vectorizer = CountVectorizer(vocabulary=orig_vocab, ngram_range=(1, 2))
+            new_vocab = [term.replace(' ', '_') for term in orig_vocab]
         weights = vectorizer.fit_transform(abstracts_df['abstract'].tolist()).toarray()
-        new_vocab = [term.replace(' ', '_') for term in orig_vocab]
         counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=new_vocab,
                                  data=weights)
         counts_df.to_csv(join(dataset_dir, 'feature_counts.txt'), sep='\t',
