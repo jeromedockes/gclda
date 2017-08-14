@@ -128,7 +128,6 @@ class Decoder(object):
 
         vocabulary = [term.replace('_', ' ') for term in self.model.dataset.word_labels]
         max_len = max([len(term.split(' ')) for term in vocabulary])
-        print(max_len)
         vectorizer = CountVectorizer(vocabulary=self.model.dataset.word_labels,
                                      ngram_range=(1, max_len))
         word_counts = np.squeeze(vectorizer.fit_transform([text]).toarray())
