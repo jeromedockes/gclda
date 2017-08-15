@@ -96,6 +96,8 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
         else:
             abstracts_df = pd.read_csv(abstracts_file)
 
+        # Outside of the vectorization, terms should be underscore-separated to
+        # make treating them as discrete units easier.
         if vocabulary is not None:
             max_len = max([len(term.split(' ')) for term in vocabulary])
             vectorizer = CountVectorizer(vocabulary=vocabulary, ngram_range=(1, max_len))
@@ -215,7 +217,6 @@ class Dataset(object):
         A focus-x-3 array of X, Y, and Z coordinates of foci in dataset in
         stereotactic (generally MNI152) space.
 
-
     """
 
     def __init__(self, dataset_label, data_directory, mask_file=None):
@@ -274,33 +275,17 @@ class Dataset(object):
 
         return dataset
 
-    # -------------------------------------------------------------------
-    #  Additional utility functions
-    # -------------------------------------------------------------------
-
-    def apply_stop_list(self, stoplistlabel):
-        """
-        Apply a stop list
-
-        TODO: Implement, but put in import_neurosynth
-        """
-        print('Not yet implemented')
-
-    # -------------------------------------------------------------------
-    #  Functions for viewing dataset object
-    # -------------------------------------------------------------------
-
     def display_dataset_summary(self):
         """
         View dataset summary.
         """
         print('--- Dataset Summary ---')
-        print('self.dataset_label  = {0!r}'.format(self.dataset_label))
-        print('\tword-types:   {0}'.format(len(self.word_labels)))
-        print('\tword-indices: {0}'.format(len(self.wtoken_word_idx)))
-        print('\tpeak-indices: {0}'.format(self.peak_vals.shape[0]))
-        print('\tdocuments:    {0}'.format(len(self.pmids)))
-        print('\tpeak-dims:    {0}'.format(self.peak_vals.shape[1]))
+        print('\t Dataset Label   = {0!r}'.format(self.dataset_label))
+        print('\t Word-Tokens     = {0}'.format(len(self.wtoken_word_idx)))
+        print('\t Peak-Tokens     = {0}'.format(self.peak_vals.shape[0]))
+        print('\t Word-Types      = {0}'.format(len(self.word_labels)))
+        print('\t Documents       = {0}'.format(len(self.pmids)))
+        print('\t Peak-Dimensions = {0}'.format(self.peak_vals.shape[1]))
 
     def view_word_labels(self, n_word_labels=1000):
         """
@@ -344,7 +329,7 @@ class Dataset(object):
         print('...')
 
 if __name__ == '__main__':
-    print('Calling dataset.py as a script')
+    print('Displaying Neurosynth2015Filtered2_1000docs dataset information...')
 
-    GC_DATA = Dataset('2015Filtered2_1000docs', '../datasets/neurosynth/')
+    GC_DATA = Dataset('Neurosynth2015Filtered2_1000docs', '../data/datasets/')
     GC_DATA.display_dataset_summary()

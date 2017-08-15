@@ -89,14 +89,14 @@ def test_save_model():
     remove(temp_file)
 
 
-def test_print_all_model_params():
+def test_save_model_params():
     """Ensure appropriate files are created.
     """
     model_file = join(get_test_data_path(), 'gclda_model.pkl')
     temp_dir = join(get_test_data_path(), 'temp')
 
     model = Model.load(model_file)
-    model.print_all_model_params(temp_dir, n_top_words=2)
+    model.save_model_params(temp_dir, n_top_words=2)
     files_found = [isfile(join(temp_dir, 'Topic_X_Word_Probs.csv')),
                    isfile(join(temp_dir, 'Topic_X_Word_CountMatrix.csv')),
                    isfile(join(temp_dir, 'ActivationAssignments.csv'))]
@@ -105,14 +105,14 @@ def test_print_all_model_params():
     # Perform cleanup
     rmtree(temp_dir)
 
-def test_print_topic_figures():
+def test_save_topic_figures():
     """Writes out images for topics.
     """
     model_file = join(get_test_data_path(), 'gclda_model.pkl')
     temp_dir = join(get_test_data_path(), 'temp')
 
     model = Model.load(model_file)
-    model.print_topic_figures(temp_dir, n_top_words=5)
+    model.save_topic_figures(temp_dir, n_top_words=5)
     figures = glob(join(temp_dir, '*.png'))
     assert len(figures) == model.n_topics
 

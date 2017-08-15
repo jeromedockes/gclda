@@ -126,6 +126,8 @@ class Decoder(object):
         if isinstance(text, list):
             text = ' '.join(text)
 
+        # Assume that words in word_labels are underscore-separated.
+        # Convert to space-separation for vectorization of input string.
         vocabulary = [term.replace('_', ' ') for term in self.model.dataset.word_labels]
         max_len = max([len(term.split(' ')) for term in vocabulary])
         vectorizer = CountVectorizer(vocabulary=self.model.dataset.word_labels,

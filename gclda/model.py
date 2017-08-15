@@ -138,9 +138,12 @@ class Model(object):
                                # (not in paper)
         self.symmetric = symmetric  # Use constrained symmetry on subregions?
                                     # (only for n_regions = 2)
-
-        # Get model name
-        self.model_name = self._get_model_name()
+        self.model_name = ('{0}_{1}T_{2}R_alpha{3:.3f}_beta{4:.3f}_'
+                           'gamma{5:.3f}_delta{6:.3f}_{7}dobs_{8:.1f}roi_{9}symmetric_'
+                           '{10}').format(self.dataset.dataset_label, self.n_topics,
+                                          self.n_regions, self.alpha, self.beta,
+                                          self.gamma, self.delta, self.dobs,
+                                          self.roi_size, self.symmetric, self.seed_init)
 
         # --- Get dimensionalities of vectors/matrices from dataset object
         self.n_peak_tokens = len(self.dataset.ptoken_doc_idx)  # Number of peak-tokens
@@ -751,10 +754,6 @@ class Model(object):
                                          # to avoid any underflow issues
         return p
 
-    # --------------------------------------------------------------------------------
-    # <<<<< Export Methods >>>>> Print Topics, Model parameters, and Figures to file |
-    # --------------------------------------------------------------------------------
-
     def get_spatial_probs(self):
         """
         Get conditional probability of selecting each voxel in the brain mask
@@ -824,9 +823,9 @@ class Model(object):
 
         return model
 
-    def print_all_model_params(self, outputdir, n_top_words=15):
+    def save_model_params(self, outputdir, n_top_words=15):
         """
-        Run all export-methods: calls all print-methods to export parameters to
+        Run all export-methods: calls all save-methods to export parameters to
         files.
 
         Parameters
@@ -844,21 +843,21 @@ class Model(object):
 
         # print topic-word distributions for top-K words in easy-to-read format
         outfilestr = join(outputdir, 'Topic_X_Word_Probs.csv')
-        self._print_topic_word_probs(outfilestr, n_top_words=n_top_words)
+        self._save_topic_word_probs(outfilestr, n_top_words=n_top_words)
 
         # print topic x word count matrix: m.n_word_tokens_word_by_topic
         outfilestr = join(outputdir, 'Topic_X_Word_CountMatrix.csv')
-        self._print_topic_word_counts(outfilestr)
+        self._save_topic_word_counts(outfilestr)
 
         # print activation-assignments to topics and subregions:
         # Peak_x, Peak_y, Peak_z, peak_topic_idx, peak_region_idx
         outfilestr = join(outputdir, 'ActivationAssignments.csv')
-        self._print_activation_assignments(outfilestr)
+        self._save_activation_assignments(outfilestr)
 
-    def _print_activation_assignments(self, outfilestr):
+    def _save_activation_assignments(self, outfilestr):
         """
-        Print Peak->Topic and Peak->Subregion assignments for all x-tokens in
-        dataset.
+        Save Peak->Topic and Peak->Subregion assignments for all x-tokens in
+        dataset to file.
 
         Parameters
         ----------
@@ -879,9 +878,9 @@ class Model(object):
                                                         self.peak_region_idx[i_peak_token]+1)
                 fid.write(outstr)
 
-    def _print_topic_word_counts(self, outfilestr):
+    def _save_topic_word_counts(self, outfilestr):
         """
-        Print Topic->Word counts for all topics and words.
+        Save Topic->Word counts for all topics and words to file.
 
         Parameters
         ----------
@@ -907,9 +906,9 @@ class Model(object):
                 # Newline for next wlabel row
                 fid.write('\n')
 
-    def _print_topic_word_probs(self, outfilestr, n_top_words=15):
+    def _save_topic_word_probs(self, outfilestr, n_top_words=15):
         """
-        Print Topic->Word probability distributions for top K words to File.
+        Save Topic->Word probability distributions for top K words to file.
 
         Parameters
         ----------
@@ -948,9 +947,9 @@ class Model(object):
                                                     rnk_vals[i, j_topic]))
                 fid.write('\n')
 
-    def print_topic_figures(self, outputdir, backgroundpeakfreq=10, n_top_words=12):
+    def save_topic_figures(self, outputdir, backgroundpeakfreq=10, n_top_words=12):
         """
-        Print Topic Figures: Spatial distributions and Linguistic distributions
+        Save Topic Figures: Spatial distributions and Linguistic distributions
         for top K words.
 
         Parameters
@@ -1093,10 +1092,6 @@ class Model(object):
             fig.savefig(outfilestr, dpi=fig.dpi)
             plt.close(fig)
 
-    # -----------------------------------------------------------------------------------------
-    # <<<<< Utility Methods for Displaying Model >>>> Display Model summary, Get Model-String |
-    # -----------------------------------------------------------------------------------------
-
     def display_model_summary(self, debug=False):
         """
         Print model summary to console.
@@ -1166,25 +1161,3 @@ class Model(object):
                   '{0!r}'.format(np.sum(self.n_peak_tokens_doc_by_topic, axis=0)))
             print('\t sum(n_peak_tokens_region_by_topic, axis=0) = '
                   '{0!r}'.format(np.sum(self.n_peak_tokens_region_by_topic, axis=0)))
-
-    def _get_model_name(self):
-        """
-        Get a model-string, unique to current dataset label + parameter
-        settings.
-
-        Returns
-        -------
-        outstr : str
-            The name of the model.
-        """
-        outstr = ('{0}_{1}T_{2}R_alpha{3:.3f}_beta{4:.3f}_'
-                  'gamma{5:.3f}_delta{6:.3f}_{7}dobs_{8:.1f}roi_{9}symmetric_'
-                  '{10}').format(self.dataset.dataset_label, self.n_topics,
-                                 self.n_regions, self.alpha, self.beta,
-                                 self.gamma, self.delta, self.dobs,
-                                 self.roi_size, self.symmetric, self.seed_init)
-        return outstr
-
-
-if __name__ == '__main__':
-    print('Calling model.py as a script')
