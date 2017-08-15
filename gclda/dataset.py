@@ -11,6 +11,7 @@ from builtins import object
 from os import mkdir
 from os.path import join, isfile, isdir
 import pickle
+import gzip
 
 import numpy as np
 import pandas as pd
@@ -256,22 +257,40 @@ class Dataset(object):
     def save(self, filename):
         """
         Pickle the Dataset instance to the provided file.
+        If the filename ends with 'z', gzip will be used to write out a
+        compressed file. Otherwise, an uncompressed file will be created.
         """
-        with open(filename, 'wb') as fo:
-            pickle.dump(self, fo)
+        if filename.endswith('z'):
+            with gzip.GzipFile(filename, 'wb') as file_object:
+                pickle.dump(self, file_object)
+        else:
+            with open(filename, 'wb') as file_object:
+                pickle.dump(self, file_object)
 
     @classmethod
     def load(cls, filename):
         """
         Load a pickled Dataset instance from file.
+        If the filename ends with 'z', it will be assumed that the file is
+        compressed, and gzip will be used to load it. Otherwise, it will
+        be assumed that the file is not compressed.
         """
-        try:
-            with open(filename, 'rb') as fi:
-                dataset = pickle.load(fi)
-        except UnicodeDecodeError:
-            # Need to try this for python3
-            with open(filename, 'rb') as fi:
-                dataset = pickle.load(fi, encoding='latin')
+        if filename.endswith('z'):
+            try:
+                with gzip.GzipFile(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object)
+            except UnicodeDecodeError:
+                # Need to try this for python3
+                with gzip.GzipFile(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object, encoding='latin')
+        else:
+            try:
+                with open(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object)
+            except UnicodeDecodeError:
+                # Need to try this for python3
+                with open(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object, encoding='latin')
 
         return dataset
 

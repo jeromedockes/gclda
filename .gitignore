@@ -104,5 +104,6 @@ ENV/
 example_results/
 examples/results/
 examples/tutorial_results/
-data/models/
+examples/data/example_dataset/
+data/models/**.pkl
 doc/_build/

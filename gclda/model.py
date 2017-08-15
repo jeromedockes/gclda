@@ -11,6 +11,7 @@ from builtins import object
 from os import mkdir
 from os.path import join, isdir
 import pickle
+import gzip
 
 import numpy as np
 import nibabel as nib
@@ -794,32 +795,40 @@ class Model(object):
     def save(self, filename):
         """
         Pickle the Model instance to the provided file.
-
-        Parameters
-        ----------
-        filename : str
-            Pickle file to write Model instance to.
+        If the filename ends with 'z', gzip will be used to write out a
+        compressed file. Otherwise, an uncompressed file will be created.
         """
-        with open(filename, 'wb') as fo:
-            pickle.dump(self, fo)
+        if filename.endswith('z'):
+            with gzip.GzipFile(filename, 'wb') as file_object:
+                pickle.dump(self, file_object)
+        else:
+            with open(filename, 'wb') as file_object:
+                pickle.dump(self, file_object)
 
     @classmethod
     def load(cls, filename):
         """
         Load a pickled Model instance from file.
-
-        Parameters
-        ----------
-        filename : str
-            Pickle file containing a saved Model instance.
+        If the filename ends with 'z', it will be assumed that the file is
+        compressed, and gzip will be used to load it. Otherwise, it will
+        be assumed that the file is not compressed.
         """
-        try:
-            with open(filename, 'rb') as fi:
-                model = pickle.load(fi)
-        except UnicodeDecodeError:
-            # Need to try this for python3
-            with open(filename, 'rb') as fi:
-                model = pickle.load(fi, encoding='latin')
+        if filename.endswith('z'):
+            try:
+                with gzip.GzipFile(filename, 'rb') as file_object:
+                    model = pickle.load(file_object)
+            except UnicodeDecodeError:
+                # Need to try this for python3
+                with gzip.GzipFile(filename, 'rb') as file_object:
+                    model = pickle.load(file_object, encoding='latin')
+        else:
+            try:
+                with open(filename, 'rb') as file_object:
+                    model = pickle.load(file_object)
+            except UnicodeDecodeError:
+                # Need to try this for python3
+                with open(filename, 'rb') as file_object:
+                    model = pickle.load(file_object, encoding='latin')
 
         return model
 
