@@ -68,18 +68,40 @@ def test_run_iteration():
 
 
 def test_load_model():
-    """Ensure model can be loaded from pickled file.
+    """Test gclda.model.Model.load.
     """
     model_file = join(get_test_data_path(), 'gclda_model.pkl')
     model = Model.load(model_file)
     assert isinstance(model, Model)
 
 
+def test_load_model2():
+    """Test gclda.model.Model.load with gzipped file.
+    """
+    model_file = join(get_test_data_path(), 'gclda_model.pklz')
+    model = Model.load(model_file)
+    assert isinstance(model, Model)
+
+
 def test_save_model():
-    """Ensure dataset can be saved to pickled file.
+    """Test gclda.model.Model.save.
     """
     model_file = join(get_test_data_path(), 'gclda_model.pkl')
     temp_file = join(get_test_data_path(), 'temp.pkl')
+    model = Model.load(model_file)
+    model.save(temp_file)
+    file_found = isfile(temp_file)
+    assert file_found
+
+    # Perform cleanup
+    remove(temp_file)
+
+
+def test_save_model2():
+    """Test gclda.model.Model.save with gzipped file.
+    """
+    model_file = join(get_test_data_path(), 'gclda_model.pklz')
+    temp_file = join(get_test_data_path(), 'temp.pklz')
     model = Model.load(model_file)
     model.save(temp_file)
     file_found = isfile(temp_file)

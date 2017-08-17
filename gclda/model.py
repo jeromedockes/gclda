@@ -1073,7 +1073,7 @@ class Model(object):
             ax4.set_yticklabels([])
             ax4.set_yticks([])
             ax4.set_xticks([])
-            ax4.set_title('Top k Words')
+            ax4.set_title('Top {0} Words'.format(n_top_words))
             plt.text(0.15, 0.98, outstr_labels, horizontalalignment='left',
                      verticalalignment='top')
             plt.text(0.65, 0.98, outstr_vals, horizontalalignment='left',

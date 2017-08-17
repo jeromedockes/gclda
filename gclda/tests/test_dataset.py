@@ -91,18 +91,40 @@ def test_init():
 
 
 def test_load_dataset():
-    """Ensure dataset can be loaded from pickled file.
+    """Test gclda.dataset.Dataset.load.
     """
     dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
     dset = Dataset.load(dataset_file)
     assert isinstance(dset, Dataset)
 
 
+def test_load_dataset2():
+    """Test gclda.dataset.Dataset.load with gzipped file.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pklz')
+    dset = Dataset.load(dataset_file)
+    assert isinstance(dset, Dataset)
+
+
 def test_save_dataset():
-    """Ensure dataset can be saved to pickled file.
+    """Test gclda.dataset.Dataset.save.
     """
     dataset_file = join(get_test_data_path(), 'gclda_dataset.pkl')
     temp_file = join(get_test_data_path(), 'temp.pkl')
+    dset = Dataset.load(dataset_file)
+    dset.save(temp_file)
+    file_found = isfile(temp_file)
+    assert file_found
+
+    # Perform cleanup
+    remove(temp_file)
+
+
+def test_save_dataset2():
+    """Test gclda.dataset.Dataset.save with gzipped file.
+    """
+    dataset_file = join(get_test_data_path(), 'gclda_dataset.pklz')
+    temp_file = join(get_test_data_path(), 'temp.pklz')
     dset = Dataset.load(dataset_file)
     dset.save(temp_file)
     file_found = isfile(temp_file)
