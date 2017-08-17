@@ -3,12 +3,19 @@
 """
 Tests for GC-LDA model module.
 """
-from os.path import join
+from os.path import join, isdir
 
 import matplotlib
 import nibabel as nib
 from neurosynth.tests.utils import get_test_dataset
 from gclda.tests.utils import get_test_data_path
+
+
+def test_get_resource_path():
+    """Test gclda.utils.get_resource_path.
+    """
+    from gclda.utils import get_resource_path
+    assert isdir(get_resource_path())
 
 
 def test_plot_brain():

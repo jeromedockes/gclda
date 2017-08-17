@@ -11,6 +11,7 @@ from builtins import object
 from os import mkdir
 from os.path import join, isfile, isdir
 import pickle
+import gzip
 
 import numpy as np
 import pandas as pd
@@ -19,7 +20,8 @@ from neurosynth.base.mask import Masker
 
 
 def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
-                      counts_file=None, abstracts_file=None, email=None):
+                      counts_file=None, abstracts_file=None, email=None,
+                      vocabulary=None):
     """Transform Neurosynth's data into gcLDA-compatible files.
 
     This function produces four files (word_indices.txt, word_labels.txt,
@@ -68,6 +70,11 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
         Only one of `counts_file`, `abstracts_file`, and `email` needs to be
         specified.
 
+    vocabulary : :obj:`list` of :obj:`str`, optional
+        A list of terms to use as the vocabulary for a dataset. Only works if
+        `abstracts_file` or `email address` is provided (but not if
+        `counts_file` is used).
+
     """
     dataset_dir = join(out_dir, dataset_label)
     if not isdir(dataset_dir):
@@ -89,9 +96,18 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
                                 'counts_file or abstracts_file are not.')
         else:
             abstracts_df = pd.read_csv(abstracts_file)
-        vectorizer = CountVectorizer(vocabulary=orig_vocab)
+
+        # Outside of the vectorization, terms should be underscore-separated to
+        # make treating them as discrete units easier.
+        if vocabulary is not None:
+            max_len = max([len(term.split(' ')) for term in vocabulary])
+            vectorizer = CountVectorizer(vocabulary=vocabulary, ngram_range=(1, max_len))
+            new_vocab = [term.replace(' ', '_') for term in vocabulary]
+        else:
+            vectorizer = CountVectorizer(vocabulary=orig_vocab, ngram_range=(1, 2))
+            new_vocab = [term.replace(' ', '_') for term in orig_vocab]
         weights = vectorizer.fit_transform(abstracts_df['abstract'].tolist()).toarray()
-        counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=orig_vocab,
+        counts_df = pd.DataFrame(index=abstracts_df['pmid'], columns=new_vocab,
                                  data=weights)
         counts_df.to_csv(join(dataset_dir, 'feature_counts.txt'), sep='\t',
                          index_label='pmid')
@@ -202,7 +218,6 @@ class Dataset(object):
         A focus-x-3 array of X, Y, and Z coordinates of foci in dataset in
         stereotactic (generally MNI152) space.
 
-
     """
 
     def __init__(self, dataset_label, data_directory, mask_file=None):
@@ -242,52 +257,54 @@ class Dataset(object):
     def save(self, filename):
         """
         Pickle the Dataset instance to the provided file.
+        If the filename ends with 'z', gzip will be used to write out a
+        compressed file. Otherwise, an uncompressed file will be created.
         """
-        with open(filename, 'wb') as fo:
-            pickle.dump(self, fo)
+        if filename.endswith('z'):
+            with gzip.GzipFile(filename, 'wb') as file_object:
+                pickle.dump(self, file_object)
+        else:
+            with open(filename, 'wb') as file_object:
+                pickle.dump(self, file_object)
 
     @classmethod
     def load(cls, filename):
         """
         Load a pickled Dataset instance from file.
+        If the filename ends with 'z', it will be assumed that the file is
+        compressed, and gzip will be used to load it. Otherwise, it will
+        be assumed that the file is not compressed.
         """
-        try:
-            with open(filename, 'rb') as fi:
-                dataset = pickle.load(fi)
-        except UnicodeDecodeError:
-            # Need to try this for python3
-            with open(filename, 'rb') as fi:
-                dataset = pickle.load(fi, encoding='latin')
+        if filename.endswith('z'):
+            try:
+                with gzip.GzipFile(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object)
+            except UnicodeDecodeError:
+                # Need to try this for python3
+                with gzip.GzipFile(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object, encoding='latin')
+        else:
+            try:
+                with open(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object)
+            except UnicodeDecodeError:
+                # Need to try this for python3
+                with open(filename, 'rb') as file_object:
+                    dataset = pickle.load(file_object, encoding='latin')
 
         return dataset
-
-    # -------------------------------------------------------------------
-    #  Additional utility functions
-    # -------------------------------------------------------------------
-
-    def apply_stop_list(self, stoplistlabel):
-        """
-        Apply a stop list
-
-        TODO: Implement, but put in import_neurosynth
-        """
-        print('Not yet implemented')
-
-    # -------------------------------------------------------------------
-    #  Functions for viewing dataset object
-    # -------------------------------------------------------------------
 
     def display_dataset_summary(self):
         """
         View dataset summary.
         """
         print('--- Dataset Summary ---')
-        print('self.dataset_label  = {0!r}'.format(self.dataset_label))
-        print('\tword-types:   {0}'.format(len(self.word_labels)))
-        print('\tword-indices: {0}'.format(len(self.wtoken_word_idx)))
-        print('\tpeak-indices: {0}'.format(self.peak_vals.shape[0]))
-        print('\tdocuments:    {0}'.format(len(self.pmids)))
-        print('\tpeak-dims:    {0}'.format(self.peak_vals.shape[1]))
+        print('\t Dataset Label   = {0!r}'.format(self.dataset_label))
+        print('\t Word-Tokens     = {0}'.format(len(self.wtoken_word_idx)))
+        print('\t Peak-Tokens     = {0}'.format(self.peak_vals.shape[0]))
+        print('\t Word-Types      = {0}'.format(len(self.word_labels)))
+        print('\t Documents       = {0}'.format(len(self.pmids)))
+        print('\t Peak-Dimensions = {0}'.format(self.peak_vals.shape[1]))
 
     def view_word_labels(self, n_word_labels=1000):
         """
@@ -331,7 +348,7 @@ class Dataset(object):
         print('...')
 
 if __name__ == '__main__':
-    print('Calling dataset.py as a script')
+    print('Displaying Neurosynth2015Filtered2_1000docs dataset information...')
 
-    GC_DATA = Dataset('2015Filtered2_1000docs', '../datasets/neurosynth/')
+    GC_DATA = Dataset('Neurosynth2015Filtered2_1000docs', '../data/datasets/')
     GC_DATA.display_dataset_summary()

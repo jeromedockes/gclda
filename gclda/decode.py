@@ -38,7 +38,7 @@ class Decoder(object):
         self.model = model
         self.dataset = model.dataset
 
-    def decode_roi(self, roi_file, topic_priors=None):
+    def decode_roi(self, roi, topic_priors=None):
         """
         Perform image-to-text decoding for discrete image inputs (e.g., regions
         of interest, significant clusters).
@@ -54,7 +54,7 @@ class Decoder(object):
             for your selected studies.
         """
         # Load ROI file and get ROI voxels
-        roi_arr = self.model.dataset.masker.mask(roi_file)
+        roi_arr = self.model.dataset.masker.mask(roi)
         roi_voxels = np.where(roi_arr > 0)[0]
 
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
@@ -124,9 +124,14 @@ class Decoder(object):
             probabilities.
         """
         if isinstance(text, list):
-            text = ' '.join(text.join)
+            text = ' '.join(text)
 
-        vectorizer = CountVectorizer(vocabulary=self.model.dataset.word_labels)
+        # Assume that words in word_labels are underscore-separated.
+        # Convert to space-separation for vectorization of input string.
+        vocabulary = [term.replace('_', ' ') for term in self.model.dataset.word_labels]
+        max_len = max([len(term.split(' ')) for term in vocabulary])
+        vectorizer = CountVectorizer(vocabulary=self.model.dataset.word_labels,
+                                     ngram_range=(1, max_len))
         word_counts = np.squeeze(vectorizer.fit_transform([text]).toarray())
         keep_idx = np.where(word_counts > 0)[0]
         text_counts = word_counts[keep_idx]

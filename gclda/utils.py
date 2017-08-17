@@ -6,10 +6,21 @@ Utility functions.
 from __future__ import print_function, division
 
 from builtins import range
+from os.path import abspath, dirname, join, pardir, sep
+
 import numpy as np
 import numpy.linalg as npl
 import nibabel as nib
 import matplotlib.pyplot as plt
+
+
+def get_resource_path():
+    """
+    Returns the path to general resources, terminated with separator. Resources
+    are kept outside package folder in "datasets".
+    Based on function by Yaroslav Halchenko used in Neurosynth Python package.
+    """
+    return abspath(join(dirname(__file__), pardir, 'data') + sep)
 
 
 def plot_brain(data, underlay, x=0, y=0, z=0):

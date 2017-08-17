@@ -102,7 +102,8 @@ ENV/
 
 # Package-specific
 example_results/
-examples/gclda_results/
-examples/gclda_tutorial_results/
-datasets/models/
+examples/results/
+examples/tutorial_results/
+examples/data/example_dataset/
+data/models/**.pkl
 doc/_build/
