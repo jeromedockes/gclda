@@ -61,7 +61,7 @@ class Decoder(object):
         p_topic_g_roi = p_topic_g_voxel[roi_voxels, :]  # p(T|V) for voxels in ROI only
         topic_weights = np.sum(p_topic_g_roi, axis=0)  # Sum across words
         if topic_priors is not None:
-            topic_weights *= topic_priors[:, None]
+            topic_weights *= topic_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
@@ -73,7 +73,7 @@ class Decoder(object):
         decoded_df = pd.DataFrame(index=self.model.dataset.word_labels, columns=['Weight'],
                                   data=word_weights)
         decoded_df.index.name = 'Term'
-        return decoded_df
+        return decoded_df, topic_weights
 
     def decode_continuous(self, image, topic_priors=None):
         """
@@ -92,9 +92,9 @@ class Decoder(object):
         input_values = self.dataset.masker.mask(image)
 
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
-        topic_weights = np.dot(p_topic_g_voxel.T, input_values[:, None])
+        topic_weights = np.abs(np.squeeze(np.dot(p_topic_g_voxel.T, input_values[:, None])))
         if topic_priors is not None:
-            topic_weights *= topic_priors[:, None]
+            topic_weights *= topic_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
@@ -106,7 +106,7 @@ class Decoder(object):
         decoded_df = pd.DataFrame(index=self.model.dataset.word_labels, columns=['Weight'],
                                   data=word_weights)
         decoded_df.index.name = 'Term'
-        return decoded_df
+        return decoded_df, topic_weights
 
     def encode(self, text, out_file=None, topic_priors=None):
         """
@@ -144,13 +144,13 @@ class Decoder(object):
         topic_weights = np.sum(prod, axis=0)  # Sum across words
         if topic_priors is not None:
             topic_weights *= topic_priors
-
         topic_weights /= np.sum(topic_weights)  # tau_t
+
         _, p_voxel_g_topic = self.model.get_spatial_probs()
         voxel_weights = np.dot(p_voxel_g_topic, topic_weights)
         voxel_weights_matrix = self.model.dataset.masker.unmask(voxel_weights)
 
+        img = nib.Nifti1Image(voxel_weights_matrix, self.model.dataset.masker.volume.affine)
         if out_file is not None:
-            img = nib.Nifti1Image(voxel_weights_matrix, self.model.dataset.masker.volume.affine)
             img.to_filename(out_file)
-        return voxel_weights_matrix
+        return img, topic_weights
