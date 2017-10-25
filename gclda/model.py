@@ -18,6 +18,8 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
+from .due import due, Doi
+
 
 class Model(object):
     """
@@ -581,7 +583,8 @@ class Model(object):
     # --------------------------------------------------------------------------------
     # <<<<< Utility Methods for GC-LDA >>>>> Log-Likelihood, Get Peak-Probs , mnpdf  |
     # --------------------------------------------------------------------------------
-
+    @due.dcite(Doi('10.1145/1577069.1755845'),
+               description='Describes method for computing log-likelihood used in model.')
     def _compute_log_likelihood(self, update_vectors=True):
         """
         Compute Log-likelihood of a dataset object given current model.

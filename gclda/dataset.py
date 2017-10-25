@@ -346,9 +346,3 @@ class Dataset(object):
             print(self.ptoken_doc_idx[i], self.peak_vals[i])
 
         print('...')
-
-if __name__ == '__main__':
-    print('Displaying Neurosynth2015Filtered2_1000docs dataset information...')
-
-    GC_DATA = Dataset('Neurosynth2015Filtered2_1000docs', '../data/datasets/')
-    GC_DATA.display_dataset_summary()

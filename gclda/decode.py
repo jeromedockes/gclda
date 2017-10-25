@@ -11,21 +11,10 @@ import pandas as pd
 import nibabel as nib
 from sklearn.feature_extraction.text import CountVectorizer
 
-from .due import due, BibTeX
+from .due import due, Doi
 
 
-@due.dcite(BibTeX('@article {Rubin059618,'\
-            	  'author = {Rubin, Timothy N and Koyejo, Oluwasanmi and '\
-                  'Gorgolewski, Krzysztof J and Jones, Michael N and '\
-                  'Poldrack, Russell A and Yarkoni, Tal},'\
-            	  'title = {Decoding brain activity using a large-scale probabilistic '\
-                  'functional-anatomical atlas of human cognition},'\
-            	  'year = {2016},'\
-            	  'doi = {10.1101/059618},'\
-            	  'publisher = {Cold Spring Harbor Labs Journals},'\
-            	  'URL = {http://www.biorxiv.org/content/early/2016/06/18/059618},'\
-            	  'eprint = {http://www.biorxiv.org/content/early/2016/06/18/059618.full.pdf},'\
-            	  'journal = {bioRxiv}}'),
+@due.dcite(Doi('10.1371/journal.pcbi.1005649'),
            description='Describes decoding methods using GC-LDA.')
 class Decoder(object):
     """

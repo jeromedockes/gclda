@@ -8,7 +8,7 @@ from .dataset import Dataset
 from .model import Model
 from .decode import Decoder
 from .version import __version__
-from .due import due, Doi, BibTeX
+from .due import due, BibTeX
 
 __all__ = ['dataset', 'model', 'decode', 'utils']
 
@@ -31,4 +31,4 @@ due.cite(BibTeX('@incollection{NIPS2016_6274,'\
          version=__version__, path='gclda', cite_module=True)
 
 # Cleanup
-del due, Doi, BibTeX
+del due, BibTeX
