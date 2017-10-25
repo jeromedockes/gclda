@@ -9,7 +9,7 @@ from builtins import object
 import numpy as np
 import pandas as pd
 import nibabel as nib
-from nilearn.masking import apply_mask
+from nilearn.masking import apply_mask, unmask
 from sklearn.feature_extraction.text import CountVectorizer
 
 from .due import due, Doi
@@ -43,9 +43,14 @@ class Decoder(object):
         4.  The resulting vector (tau_t*p_word_g_topic) should be word weights
             for your selected studies.
         """
-        if roi.affine != self.model.dataset.mask_img.affine:
+        if type(roi) == str:
+            roi = nib.load(roi)
+
+        if not np.array_equal(roi.affine, self.model.dataset.mask_img.affine):
+            str1 = np.array2string(roi.affine)
+            str2 = np.array2string(self.model.dataset.mask_img.affine)
             raise ValueError('Input roi must have same affine as mask img:'
-                             '\n{0}'.format(np.array2string(self.model.dataset.mask_img.affine)))
+                             '\n{0}\n{1}'.format(str1, str2))
 
         # Load ROI file and get ROI voxels overlapping with brain mask
         roi_arr = roi.get_data() & self.model.dataset.mask_img.get_data()
@@ -141,9 +146,9 @@ class Decoder(object):
 
         _, p_voxel_g_topic = self.model.get_spatial_probs()
         voxel_weights = np.dot(p_voxel_g_topic, topic_weights)
-        voxel_weights_matrix = self.model.dataset.masker.unmask(voxel_weights)
+        voxel_weights_matrix = unmask(voxel_weights, self.model.dataset.mask_img)
 
-        img = nib.Nifti1Image(voxel_weights_matrix, self.model.dataset.masker.volume.affine)
+        img = nib.Nifti1Image(voxel_weights_matrix, self.model.dataset.mask_img.affine)
         if out_file is not None:
             img.to_filename(out_file)
         return img, topic_weights

@@ -16,6 +16,7 @@ import gzip
 import numpy as np
 import pandas as pd
 import neurosynth
+import nibabel as nib
 
 
 def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
@@ -228,7 +229,7 @@ class Dataset(object):
             mask_file = join(resource_dir, 'MNI152_T1_2mm_brain.nii.gz')
             mask_img = nib.load(mask_file)
             data = mask_img.get_data()
-            data = data!=0
+            data = (data!=0).astype(int)
             self.mask_img = nib.Nifti1Image(data, mask_img.affine)
         else:
             # Assume mask is binary

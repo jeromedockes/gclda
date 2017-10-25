@@ -73,7 +73,7 @@ def test_encode():
     model = Model.load(model_file)
     decoder = Decoder(model)
     encoded_img, _ = decoder.encode(text)
-    assert encoded_img.shape == model.dataset.masker.volume.shape
+    assert encoded_img.shape == model.dataset.mask_img.shape
 
 
 def test_encode_with_priors():
@@ -85,4 +85,4 @@ def test_encode_with_priors():
     decoder = Decoder(model)
     _, priors = decoder.encode(text)
     encoded_img, _ = decoder.encode(text, topic_priors=priors)
-    assert encoded_img.shape == model.dataset.masker.volume.shape
+    assert encoded_img.shape == model.dataset.mask_img.shape
