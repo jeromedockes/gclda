@@ -15,8 +15,7 @@ import gzip
 
 import numpy as np
 import pandas as pd
-from neurosynth.tests.utils import get_resource_path
-from neurosynth.base.mask import Masker
+import neurosynth
 
 
 def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
@@ -194,9 +193,8 @@ class Dataset(object):
     dataset_label : str
         The name of the dataset.
 
-    masker : :obj:`neurosynth.base.mask.Masker`
-        A Neurosynth Masker object used for masking and unmasking voxels
-        according to a binary brain mask in stereotactic space.
+    mask_img : :obj:`nibabel.Nifti1Image`
+        A nifti object of the mask file.
 
     word_labels : :obj:`list` of :obj:`str`
         List of word-strings (wtoken_word_idx values are indices into this
@@ -225,9 +223,16 @@ class Dataset(object):
         self.dataset_label = dataset_label
 
         if mask_file is None:
-            resource_dir = get_resource_path()
+            # Load and binarize 2mm map provided by Neurosynth
+            resource_dir = neurosynth.tests.utils.get_resource_path()
             mask_file = join(resource_dir, 'MNI152_T1_2mm_brain.nii.gz')
-        self.masker = Masker(mask_file)
+            mask_img = nib.load(mask_file)
+            data = mask_img.get_data()
+            data = data!=0
+            self.mask_img = nib.Nifti1Image(data, mask_img.affine)
+        else:
+            # Assume mask is binary
+            self.mask_img = nib.load(mask_file)
 
         # Import all word-labels into a list
         wlabels_file = join(data_directory, self.dataset_label, 'word_labels.txt')

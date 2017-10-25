@@ -9,6 +9,7 @@ from builtins import object
 import numpy as np
 import pandas as pd
 import nibabel as nib
+from nilearn.masking import apply_mask
 from sklearn.feature_extraction.text import CountVectorizer
 
 from .due import due, Doi
@@ -42,8 +43,12 @@ class Decoder(object):
         4.  The resulting vector (tau_t*p_word_g_topic) should be word weights
             for your selected studies.
         """
-        # Load ROI file and get ROI voxels
-        roi_arr = self.model.dataset.masker.mask(roi)
+        if roi.affine != self.model.dataset.mask_img.affine:
+            raise ValueError('Input roi must have same affine as mask img:'
+                             '\n{0}'.format(np.array2string(self.model.dataset.mask_img.affine)))
+
+        # Load ROI file and get ROI voxels overlapping with brain mask
+        roi_arr = roi.get_data() & self.model.dataset.mask_img.get_data()
         roi_voxels = np.where(roi_arr > 0)[0]
 
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
@@ -78,8 +83,7 @@ class Decoder(object):
             they won't necessarily mean much.
         """
         # Load image file and get voxel values
-        input_values = self.dataset.masker.mask(image)
-
+        input_values = apply_mask(image, self.model.dataset.mask_img)
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
         topic_weights = np.abs(np.squeeze(np.dot(p_topic_g_voxel.T, input_values[:, None])))
         if topic_priors is not None:

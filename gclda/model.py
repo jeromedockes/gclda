@@ -775,9 +775,8 @@ class Model(object):
             For cell ij, the value is the probability of topic j being selected
             given voxel i is active.
         """
-        masker = self.dataset.masker
-        affine = masker.volume.affine
-        mask_ijk = np.vstack(np.where(masker.volume.get_data() > 0)).T
+        affine = self.dataset.mask_img.affine
+        mask_ijk = np.vstack(np.where(self.dataset.mask_img.get_data())).T
         mask_xyz = nib.affines.apply_affine(affine, mask_ijk)
 
         spatial_dists = np.zeros((mask_xyz.shape[0], self.n_topics), float)
