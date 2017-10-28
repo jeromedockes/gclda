@@ -32,7 +32,7 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
 
     Parameters
     ----------
-    neurosynth_dataset :
+    neurosynth_dataset : :obj:`neurosynth.base.dataset.Dataset`
         A Neurosynth Dataset object containing data needed by gcLDA.
 
     dataset_label : str
@@ -62,7 +62,7 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
         Only one of `counts_file`, `abstracts_file`, and `email` needs to be
         specified.
 
-    email : str, optional
+    email : :obj:`str`, optional
         A valid email address. If neither `counts_file` or `abstracts_file` is
         provided, then `import_neurosynth` will attempt to download article
         abstracts using Neurosynth's `download_abstracts` function. This calls
@@ -201,19 +201,19 @@ class Dataset(object):
         List of word-strings (wtoken_word_idx values are indices into this
         list).
 
-    pmids : :obj:`list` of :obj:`numpy.int64`
+    pmids : :obj:`list` of :obj:`int`
         List of PubMed IDs (i.e., studies) in dataset.
 
-    wtoken_doc_idx : :obj:`list` of :obj:`numpy.int64`
+    wtoken_doc_idx : :obj:`list` of :obj:`int`
         List of document-indices for word-tokens.
 
-    wtoken_word_idx : :obj:`list` of :obj:`numpy.int64`
+    wtoken_word_idx : :obj:`list` of :obj:`int`
         List of word-indices for word-tokens.
 
-    ptoken_doc_idx : :obj:`list` of :obj:`numpy.int64`
+    ptoken_doc_idx : :obj:`list` of :obj:`int`
         List of document-indices for peak-tokens x.
 
-    peak_vals : :obj:`numpy.ndarray` of :obj:`numpy.int64`
+    peak_vals : :obj:`numpy.ndarray` of :obj:`int`
         A focus-x-3 array of X, Y, and Z coordinates of foci in dataset in
         stereotactic (generally MNI152) space.
 
@@ -265,6 +265,11 @@ class Dataset(object):
         Pickle the Dataset instance to the provided file.
         If the filename ends with 'z', gzip will be used to write out a
         compressed file. Otherwise, an uncompressed file will be created.
+
+        Parameters
+        ----------
+        filename : str
+            Where to save Dataset instance.
         """
         if filename.endswith('z'):
             with gzip.GzipFile(filename, 'wb') as file_object:
@@ -280,6 +285,16 @@ class Dataset(object):
         If the filename ends with 'z', it will be assumed that the file is
         compressed, and gzip will be used to load it. Otherwise, it will
         be assumed that the file is not compressed.
+
+        Parameters
+        ----------
+        filename : str
+            File with saved Dataset instance.
+
+        Returns
+        -------
+        dataset : :obj:`gclda.dataset.Dataset`
+            Loaded Dataset instance.
         """
         if filename.endswith('z'):
             try:

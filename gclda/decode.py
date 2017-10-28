@@ -28,7 +28,7 @@ class Decoder(object):
         self.model = model
         self.dataset = model.dataset
 
-    def decode_roi(self, roi, topic_priors=None):
+    def decode_roi(self, roi, topic_priors=None, prior_weight=1.):
         """
         Perform image-to-text decoding for discrete image inputs (e.g., regions
         of interest, significant clusters).
@@ -42,9 +42,31 @@ class Decoder(object):
         3.  Multiply tau_t by topic-by-word matrix (p_word_g_topic).
         4.  The resulting vector (tau_t*p_word_g_topic) should be word weights
             for your selected studies.
+
+        Parameters
+        ----------
+        roi : :obj:`nibabel.Nifti1Image` or str
+            Binary image to decode into text. If string, path to a file with
+            the binary image.
+        topic_priors : :obj:`numpy.ndarray` of :obj:`float`, optional
+            A 1d array of size (n_topics) with values for topic weighting.
+            If None, no weighting is done. Default is None.
+        prior_weight : float, optional
+            The weight by which the prior will affect the decoding.
+            Default is 1.
+
+        Returns
+        -------
+        decoded_df : :obj:`pandas.DataFrame`
+            A DataFrame with the word-tokens and their associated weights.
+        topic_weights : :obj:`numpy.ndarray` of :obj:`float`
+            The weights of the topics used in decoding.
         """
-        if type(roi) == str:
+        if isinstance(roi, str):
             roi = nib.load(roi)
+        elif not isinstance(roi, nib.Nifti1Image):
+            raise IOError('Input roi must be either a nifti image '
+                          '(nibabel.Nifti1Image) or a path to one.')
 
         if not np.array_equal(roi.affine, self.model.dataset.mask_img.affine):
             str1 = np.array2string(roi.affine)
@@ -60,7 +82,8 @@ class Decoder(object):
         p_topic_g_roi = p_topic_g_voxel[roi_voxels, :]  # p(T|V) for voxels in ROI only
         topic_weights = np.sum(p_topic_g_roi, axis=0)  # Sum across words
         if topic_priors is not None:
-            topic_weights *= topic_priors
+            weighted_priors = self._weight_priors(topic_priors, prior_weight)
+            topic_weights *= weighted_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
@@ -74,7 +97,7 @@ class Decoder(object):
         decoded_df.index.name = 'Term'
         return decoded_df, topic_weights
 
-    def decode_continuous(self, image, topic_priors=None):
+    def decode_continuous(self, image, topic_priors=None, prior_weight=1.):
         """
         Perform image-to-text decoding for continuous inputs (e.g.,
         unthresholded statistical maps).
@@ -86,13 +109,32 @@ class Decoder(object):
         4.  The resulting vector (tau_t*p_word_g_topic) should be word weights
             for your map, but the values are scaled based on the input image, so
             they won't necessarily mean much.
+
+        Parameters
+        ----------
+        image : :obj:`nibabel.Nifti1Image`
+            Whole-brain image to decode into text.
+        topic_priors : :obj:`numpy.ndarray` of :obj:`float`, optional
+            A 1d array of size (n_topics) with values for topic weighting.
+            If None, no weighting is done. Default is None.
+        prior_weight : float, optional
+            The weight by which the prior will affect the decoding.
+            Default is 1.
+
+        Returns
+        -------
+        decoded_df : :obj:`pandas.DataFrame`
+            A DataFrame with the word-tokens and their associated weights.
+        topic_weights : :obj:`numpy.ndarray` of :obj:`float`
+            The weights of the topics used in decoding.
         """
         # Load image file and get voxel values
         input_values = apply_mask(image, self.model.dataset.mask_img)
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
         topic_weights = np.abs(np.squeeze(np.dot(p_topic_g_voxel.T, input_values[:, None])))
         if topic_priors is not None:
-            topic_weights *= topic_priors
+            weighted_priors = self._weight_priors(topic_priors, prior_weight)
+            topic_weights *= weighted_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
@@ -106,7 +148,7 @@ class Decoder(object):
         decoded_df.index.name = 'Term'
         return decoded_df, topic_weights
 
-    def encode(self, text, out_file=None, topic_priors=None):
+    def encode(self, text, out_file=None, topic_priors=None, prior_weight=1.):
         """
         Perform text-to-image encoding.
 
@@ -120,6 +162,26 @@ class Decoder(object):
             model.py).
         4.  The resulting map (tau_t*A) is the encoded image. Values are *not*
             probabilities.
+
+        Parameters
+        ----------
+        text : str or list
+            Text to encode into an image.
+        out_file : str, optional
+            If not None, writes the encoded image to a file.
+        topic_priors : :obj:`numpy.ndarray` of :obj:`float`, optional
+            A 1d array of size (n_topics) with values for topic weighting.
+            If None, no weighting is done. Default is None.
+        prior_weight : float, optional
+            The weight by which the prior will affect the encoding.
+            Default is 1.
+
+        Returns
+        -------
+        img : :obj:`nibabel.Nifti1Image`
+            The encoded image.
+        topic_weights : :obj:`numpy.ndarray` of :obj:`float`
+            The weights of the topics used in encoding.
         """
         if isinstance(text, list):
             text = ' '.join(text)
@@ -141,7 +203,8 @@ class Decoder(object):
         prod = p_topic_g_text * text_counts[:, None]  # Multiply p(T|W) by words in text
         topic_weights = np.sum(prod, axis=0)  # Sum across words
         if topic_priors is not None:
-            topic_weights *= topic_priors
+            weighted_priors = self._weight_priors(topic_priors, prior_weight)
+            topic_weights *= weighted_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
         _, p_voxel_g_topic = self.model.get_spatial_probs()
@@ -152,3 +215,23 @@ class Decoder(object):
         if out_file is not None:
             img.to_filename(out_file)
         return img, topic_weights
+
+    def _weight_priors(self, topic_priors, prior_weight):
+        """
+        Combine topic priors with prior weight.
+        """
+        if not isinstance(prior_weight, float):
+            raise IOError('Input prior_weight must be a float in range (0, 1)')
+        elif not 0. <= prior_weight <= 1:
+            raise ValueError('Input prior_weight must be in range (0, 1)')
+
+        # Weight priors
+        topic_priors *= prior_weight
+
+        # Create uniform distribution to combine with priors
+        uniform = np.ones(topic_priors.shape)
+        uniform /= np.sum(uniform)
+        uniform *= (1 - prior_weight)
+
+        weighted_priors = topic_priors + uniform
+        return weighted_priors
