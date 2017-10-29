@@ -14,20 +14,20 @@ from os.path import join
 
 from gclda.dataset import Dataset
 from gclda.model import Model
-from gclda.tests.utils import get_resource_path
+from gclda.utils import get_resource_path
 
 # Set up dataset label & load/save directories
-DATASET_LABEL = '20170813'
-DATA_DIR = join(get_resource_path(), 'neurosynth/')
+DATASET_LABEL = 'Neurosynth2015Filtered2'
+DATA_DIR = join(get_resource_path(), 'datasets/')
 
 # Root-directory where model results are saved
 OUT_DIR = join(get_resource_path(), 'models/')
 
 # Sampling parameters
-N_ITERS = 1000  # Total iterations to run up to
-SAVE_FREQ = 100  # How often we save a model object and topic-distributions to file
-LOGLIKELY_FREQ = 100  # How often we compute log-likelihood (which slows training
-                      # down a bit, but is useful for tracking model progress)
+N_ITERS = 10000  # Total iterations to run up to
+SAVE_FREQ = 1000  # How often we save a model object and topic-distributions to file
+LOGLIKELY_FREQ = 50  # How often we compute log-likelihood (which slows training
+                     # down a bit, but is useful for tracking model progress)
 VERBOSITY = 2  # How much information about sampler progress gets
                # printed to console (2 is max, 0 is min)
 
@@ -35,8 +35,8 @@ VERBOSITY = 2  # How much information about sampler progress gets
 N_TOPICS = 200	# Number of topics
 N_REGIONS = 2  # Number of subregions (any positive integer, but must equal 2
                # if SYMMETRIC subregion model)
-ALPHA = .1 	# Prior count on topics for each doc
-BETA = .01 	# Prior count on word-types for each topic
+ALPHA = .1  # Prior count on topics for each doc
+BETA = .01  # Prior count on word-types for each topic
 GAMMA = .01  # Prior count added to y-counts when sampling z assignments
 DELTA = 1.0  # Prior count on subregions for each topic
 ROI_SIZE = 50  # Default spatial 'region of interest' size (default value of
@@ -66,9 +66,6 @@ model = Model(dataset, n_topics=N_TOPICS, n_regions=N_REGIONS,
               dobs=DOBS, roi_size=ROI_SIZE, symmetric=SYMMETRIC,
               seed_init=SEED_INIT)
 
-model.initialize() # Randomly initialize all z, y and r assignments.
-                   # Get initial spatial estimates
-
 # Display initialized or loaded model summary
 model.display_model_summary()
 
@@ -79,8 +76,8 @@ for i in range(model.iter, N_ITERS):
 
     # Save model and topic-word distributions every 'savefreq' iterations
     if model.iter % SAVE_FREQ == 0:
-        OUT_FILE = join(OUT_DIR, 'model_{0}_temp.pkl'.format(DATASET_LABEL))
+        OUT_FILE = join(OUT_DIR, 'model_{0}_temp.pklz'.format(DATASET_LABEL))
         model.save(OUT_FILE)
 
-OUT_FILE = join(OUT_DIR, 'model_{0}.pkl'.format(DATASET_LABEL))
+OUT_FILE = join(OUT_DIR, 'model_{0}.pklz'.format(DATASET_LABEL))
 model.save(OUT_FILE)
