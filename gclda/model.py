@@ -832,6 +832,10 @@ class Model(object):
                 with open(filename, 'rb') as file_object:
                     model = pickle.load(file_object, encoding='latin')
 
+        if not isinstance(model, Model):
+            raise IOError('Pickled object must be `gclda.model.Model`, '
+                          'not {0}'.format(type(dataset)))
+
         return model
 
     def save_model_params(self, outputdir, n_top_words=15):

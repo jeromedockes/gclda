@@ -313,6 +313,10 @@ class Dataset(object):
                 with open(filename, 'rb') as file_object:
                     dataset = pickle.load(file_object, encoding='latin')
 
+        if not isinstance(dataset, Dataset):
+            raise IOError('Pickled object must be `gclda.dataset.Dataset`, '
+                          'not {0}'.format(type(dataset)))
+
         return dataset
 
     def display_dataset_summary(self):
