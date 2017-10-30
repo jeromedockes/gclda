@@ -19,12 +19,28 @@ from .due import due, Doi
            description='Describes decoding methods using GC-LDA.')
 class Decoder(object):
     """
-    Class object for a gcLDA decoder
+    Class object for a gcLDA decoder.
+
+    A Decoder can be used to decode a continuous brain image
+    (`Decoder.decode_continuous`) or a discrete mask (`Decoder.decode_roi`) into
+    text, as well as to encode text into a continuous brain image, using a
+    trained GC-LDA model.
+
+    Parameters
+    ----------
+    model : :obj:`gclda.model.Model`
+        Model object used for decoding/encoding.
+
+    Attributes
+    ----------
+    model : :obj:`gclda.model.Model`
+        Loaded model.
+
+    dataset : :obj:`gclda.dataset.Dataset`
+        Dataset from loaded model.
+
     """
     def __init__(self, model):
-        """
-        Class object for a gcLDA decoder
-        """
         self.model = model
         self.dataset = model.dataset
 
@@ -68,11 +84,12 @@ class Decoder(object):
             raise IOError('Input roi must be either a nifti image '
                           '(nibabel.Nifti1Image) or a path to one.')
 
-        if not np.array_equal(roi.affine, self.model.dataset.mask_img.affine):
-            str1 = np.array2string(roi.affine)
-            str2 = np.array2string(self.model.dataset.mask_img.affine)
+        dset_aff = self.model.dataset.mask_img.affine
+        if not np.array_equal(roi.affine, dset_aff):
+
             raise ValueError('Input roi must have same affine as mask img:'
-                             '\n{0}\n{1}'.format(str1, str2))
+                             '\n{0}\n{1}'.format(np.array2string(roi.affine),
+                                                 np.array2string(dset_aff)))
 
         # Load ROI file and get ROI voxels overlapping with brain mask
         roi_arr = roi.get_data() & self.model.dataset.mask_img.get_data()
@@ -92,8 +109,8 @@ class Decoder(object):
         p_word_g_topic = np.nan_to_num(p_word_g_topic, 0)
         word_weights = np.dot(p_word_g_topic, topic_weights)
 
-        decoded_df = pd.DataFrame(index=self.model.dataset.word_labels, columns=['Weight'],
-                                  data=word_weights)
+        decoded_df = pd.DataFrame(index=self.model.dataset.word_labels,
+                                  columns=['Weight'], data=word_weights)
         decoded_df.index.name = 'Term'
         return decoded_df, topic_weights
 
