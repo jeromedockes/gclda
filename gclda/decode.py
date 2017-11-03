@@ -92,11 +92,13 @@ class Decoder(object):
                                                  np.array2string(dset_aff)))
 
         # Load ROI file and get ROI voxels overlapping with brain mask
-        roi_arr = roi.get_data() & self.model.dataset.mask_img.get_data()
-        roi_voxels = np.where(roi_arr > 0)[0]
+        mask_vec = self.model.dataset.mask_img.get_data().ravel().astype(bool)
+        roi_vec = roi.get_data().astype(bool).ravel()
+        roi_vec = roi_vec[mask_vec]
+        roi_idx = np.where(roi_vec)[0]
 
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
-        p_topic_g_roi = p_topic_g_voxel[roi_voxels, :]  # p(T|V) for voxels in ROI only
+        p_topic_g_roi = p_topic_g_voxel[roi_idx, :]  # p(T|V) for voxels in ROI only
         topic_weights = np.sum(p_topic_g_roi, axis=0)  # Sum across words
         if topic_priors is not None:
             weighted_priors = self._weight_priors(topic_priors, prior_weight)
