@@ -6,8 +6,10 @@ Tests for GC-LDA model module.
 from os.path import join, isdir
 
 import matplotlib
+import numpy as np
 import nibabel as nib
 from neurosynth.tests.utils import get_test_dataset
+from gclda.utils import weight_priors
 from gclda.tests.utils import get_test_data_path
 
 
@@ -16,6 +18,17 @@ def test_get_resource_path():
     """
     from gclda.utils import get_resource_path
     assert isdir(get_resource_path())
+
+
+def test_weight_priors():
+    """Test gclda.utils.weight_priors
+    For some reason `array_equal` fails, but `allclose` passes.
+    """
+    test = np.array([0.235, 0.245, 0.255, 0.265])
+    t_p = np.array([1, 2, 3, 4])
+    p_w = .1
+    weighted_priors = weight_priors(t_p, p_w)
+    assert np.allclose(weighted_priors, test)
 
 
 def test_plot_brain():

@@ -12,6 +12,7 @@ import nibabel as nib
 from nilearn.masking import apply_mask, unmask
 from sklearn.feature_extraction.text import CountVectorizer
 
+from .utils import weight_priors
 from .due import due, Doi
 
 
@@ -96,12 +97,11 @@ class Decoder(object):
         roi_vec = roi.get_data().astype(bool).ravel()
         roi_vec = roi_vec[mask_vec]
         roi_idx = np.where(roi_vec)[0]
-
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
         p_topic_g_roi = p_topic_g_voxel[roi_idx, :]  # p(T|V) for voxels in ROI only
         topic_weights = np.sum(p_topic_g_roi, axis=0)  # Sum across words
         if topic_priors is not None:
-            weighted_priors = self._weight_priors(topic_priors, prior_weight)
+            weighted_priors = weight_priors(topic_priors, prior_weight)
             topic_weights *= weighted_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
@@ -152,7 +152,7 @@ class Decoder(object):
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
         topic_weights = np.abs(np.squeeze(np.dot(p_topic_g_voxel.T, input_values[:, None])))
         if topic_priors is not None:
-            weighted_priors = self._weight_priors(topic_priors, prior_weight)
+            weighted_priors = weight_priors(topic_priors, prior_weight)
             topic_weights *= weighted_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
@@ -222,7 +222,7 @@ class Decoder(object):
         prod = p_topic_g_text * text_counts[:, None]  # Multiply p(T|W) by words in text
         topic_weights = np.sum(prod, axis=0)  # Sum across words
         if topic_priors is not None:
-            weighted_priors = self._weight_priors(topic_priors, prior_weight)
+            weighted_priors = weight_priors(topic_priors, prior_weight)
             topic_weights *= weighted_priors
         topic_weights /= np.sum(topic_weights)  # tau_t
 
@@ -234,23 +234,3 @@ class Decoder(object):
         if out_file is not None:
             img.to_filename(out_file)
         return img, topic_weights
-
-    def _weight_priors(self, topic_priors, prior_weight):
-        """
-        Combine topic priors with prior weight.
-        """
-        if not isinstance(prior_weight, float):
-            raise IOError('Input prior_weight must be a float in range (0, 1)')
-        elif not 0. <= prior_weight <= 1:
-            raise ValueError('Input prior_weight must be in range (0, 1)')
-
-        # Weight priors
-        topic_priors *= prior_weight
-
-        # Create uniform distribution to combine with priors
-        uniform = np.ones(topic_priors.shape)
-        uniform /= np.sum(uniform)
-        uniform *= (1 - prior_weight)
-
-        weighted_priors = topic_priors + uniform
-        return weighted_priors
