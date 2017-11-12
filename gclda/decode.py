@@ -51,9 +51,7 @@ class Decoder(object):
         of interest, significant clusters).
 
         1.  Compute p_topic_g_voxel.
-                - I think you need p_voxel_g_topic for this, then you do:
-                - p_topic_g_voxel = p_voxel_g_topic * p_topic / p_voxel
-                - What is p_voxel here?
+                - From Model
         2.  Compute topic weight vector (tau_t).
                 - topic_weights = np.sum(p_topic_g_voxel, axis=1) (across voxels)
         3.  Multiply tau_t by topic-by-word matrix (p_word_g_topic).
@@ -131,8 +129,10 @@ class Decoder(object):
 
         Parameters
         ----------
-        image : :obj:`nibabel.Nifti1Image`
-            Whole-brain image to decode into text.
+        image : :obj:`nibabel.Nifti1Image` or str
+            Whole-brain image to decode into text. Must be in same space as
+            model and dataset. Model's template available in
+            `model.dataset.mask_img`.
         topic_priors : :obj:`numpy.ndarray` of :obj:`float`, optional
             A 1d array of size (n_topics) with values for topic weighting.
             If None, no weighting is done. Default is None.
@@ -147,6 +147,12 @@ class Decoder(object):
         topic_weights : :obj:`numpy.ndarray` of :obj:`float`
             The weights of the topics used in decoding.
         """
+        if isinstance(image, str):
+            image = nib.load(image)
+        elif not isinstance(image, nib.Nifti1Image):
+            raise IOError('Input image must be either a nifti image '
+                          '(nibabel.Nifti1Image) or a path to one.')
+
         # Load image file and get voxel values
         input_values = apply_mask(image, self.model.dataset.mask_img)
         p_topic_g_voxel, _ = self.model.get_spatial_probs()
@@ -168,8 +174,29 @@ class Decoder(object):
         return decoded_df, topic_weights
 
     def encode(self, text, out_file=None, topic_priors=None, prior_weight=1.):
-        """
+        r"""
         Perform text-to-image encoding.
+
+        Notes
+        -----
+
+        The matrix p_topic_g_word is computed from the input text
+
+        Terminology:
+
+        .. math ::
+            P_{tw}: Matrix of
+
+        .. math ::
+            P_{tw} = p(t = i|w = j)
+
+            P_{tw} = \frac{p(w = j|t = i) * p(t = i)}{p(w)}
+
+            P_{tw} = \frac{\Phi_{ji}}{\sum_{i=1}^{T} \Phi_{ji}}
+
+            \tau_{t} = \sum_{w} P_{tw}
+
+            values = \tau_{t} \cdot A
 
         1.  Compute p_topic_g_word.
                 - p_topic_g_word = p_word_g_topic * p_topic / p_word
@@ -228,9 +255,8 @@ class Decoder(object):
 
         _, p_voxel_g_topic = self.model.get_spatial_probs()
         voxel_weights = np.dot(p_voxel_g_topic, topic_weights)
-        voxel_weights_matrix = unmask(voxel_weights, self.model.dataset.mask_img)
+        img = unmask(voxel_weights, self.model.dataset.mask_img)
 
-        img = nib.Nifti1Image(voxel_weights_matrix, self.model.dataset.mask_img.affine)
         if out_file is not None:
             img.to_filename(out_file)
         return img, topic_weights

@@ -223,23 +223,23 @@ class Model(object):
             self.peak_region_idx[:] = (self.dataset.peak_vals[:, 0] > 0).astype(int)
 
         # Update model vectors and count matrices to reflect y and r assignments
-        for i_peak_token in range(self.n_peak_tokens):
+        for i_ptoken in range(self.n_peak_tokens):
             # document -idx (d)
-            doc = self.dataset.ptoken_doc_idx[i_peak_token]
-            topic = self.peak_topic_idx[i_peak_token]  # peak-token -> topic assignment (y_i)
-            region = self.peak_region_idx[i_peak_token]  # peak-token -> subregion assignment (c_i)
+            doc = self.dataset.ptoken_doc_idx[i_ptoken]
+            topic = self.peak_topic_idx[i_ptoken]  # peak-token -> topic assignment (y_i)
+            region = self.peak_region_idx[i_ptoken]  # peak-token -> subregion assignment (c_i)
             self.n_peak_tokens_doc_by_topic[doc, topic] += 1  # Increment document-by-topic
                                                               # counts
             self.n_peak_tokens_region_by_topic[region, topic] += 1  # Increment region-by-topic
 
         # --- Randomly Initialize Word->Topic Assignments (z) for each word
         # token w_i: sample z_i proportional to p(topic|doc_i)
-        for i_word_token in range(len(self.dataset.wtoken_word_idx)):
+        for i_wtoken in range(len(self.dataset.wtoken_word_idx)):
             # w_i word-type
-            word = self.dataset.wtoken_word_idx[i_word_token]
+            word = self.dataset.wtoken_word_idx[i_wtoken]
 
             # w_i doc-index
-            doc = self.dataset.wtoken_doc_idx[i_word_token]
+            doc = self.dataset.wtoken_doc_idx[i_wtoken]
 
             # Estimate p(t|d) for current doc
             p_topic_g_doc = self.n_peak_tokens_doc_by_topic[doc] + self.gamma
@@ -255,7 +255,7 @@ class Model(object):
                                          # rand-sample
 
             # Update model assignment vectors and count-matrices to reflect z
-            self.wtoken_topic_idx[i_word_token] = topic  # Word-token -> topic assignment (z_i)
+            self.wtoken_topic_idx[i_wtoken] = topic  # Word-token -> topic assignment (z_i)
             self.n_word_tokens_word_by_topic[word, topic] += 1
             self.total_n_word_tokens_by_topic[0, topic] += 1
             self.n_word_tokens_doc_by_topic[doc, topic] += 1
@@ -328,12 +328,12 @@ class Model(object):
         np.random.seed(randseed)  # pylint: disable=no-member
 
         # Loop over all word tokens
-        for i_word_token in range(len(self.dataset.wtoken_word_idx)):
+        for i_wtoken in range(len(self.dataset.wtoken_word_idx)):
             # Get indices for current token
-            word = self.dataset.wtoken_word_idx[i_word_token]  # w_i word-type
-            doc = self.dataset.wtoken_doc_idx[i_word_token]  # w_i doc-index
-            topic = self.wtoken_topic_idx[i_word_token]  # current topic assignment for
-                                                         # word token w_i
+            word = self.dataset.wtoken_word_idx[i_wtoken]  # w_i word-type
+            doc = self.dataset.wtoken_doc_idx[i_wtoken]  # w_i doc-index
+            topic = self.wtoken_topic_idx[i_wtoken]  # current topic assignment for
+                                                     # word token w_i
 
             # Decrement count-matrices to remove current wtoken_topic_idx
             self.n_word_tokens_word_by_topic[word, topic] -= 1
@@ -354,12 +354,10 @@ class Model(object):
                                                        # distribution
             # Numpy returns a [1 x T] vector with a '1' in the index of sampled topic
             vec = np.random.multinomial(1, probs)  # pylint: disable=no-member
-            vec_loc = np.where(vec)  # Transform the indicator vector into a
-                                     # single z-index (stored in tuple)
-            topic = vec_loc[0][0]  # Extract the sampled z value from the tuple
+            topic = np.where(vec)[0][0]  # Extract selected topic from vector
 
             # Update the indices and the count matrices using the sampled z assignment
-            self.wtoken_topic_idx[i_word_token] = topic  # Update w_i topic-assignment
+            self.wtoken_topic_idx[i_wtoken] = topic  # Update w_i topic-assignment
             self.n_word_tokens_word_by_topic[word, topic] += 1
             self.total_n_word_tokens_by_topic[0, topic] += 1
             self.n_word_tokens_doc_by_topic[doc, topic] += 1
@@ -380,10 +378,10 @@ class Model(object):
         peak_probs = self._get_peak_probs()
 
         # Iterate over all peaks x, and sample a new y and r assignment for each
-        for i_peak_token in range(self.n_peak_tokens):
-            doc = self.dataset.ptoken_doc_idx[i_peak_token]
-            topic = self.peak_topic_idx[i_peak_token]
-            region = self.peak_region_idx[i_peak_token]
+        for i_ptoken in range(self.n_peak_tokens):
+            doc = self.dataset.ptoken_doc_idx[i_ptoken]
+            topic = self.peak_topic_idx[i_ptoken]
+            region = self.peak_region_idx[i_ptoken]
 
             # Decrement count in Subregion x Topic count matrix
             self.n_peak_tokens_region_by_topic[region, topic] -= 1
@@ -393,7 +391,7 @@ class Model(object):
 
             # Retrieve the probability of generating current x from all
             # subregions: [R x T] array of probs
-            p_x_subregions = (peak_probs[i_peak_token, :, :]).transpose()
+            p_x_subregions = (peak_probs[i_ptoken, :, :]).transpose()
 
             # --- Compute the probabilities of all subregions given doc:
             # p(r|d) ~ p(r|t) * p(t|d) ---
@@ -407,9 +405,12 @@ class Model(object):
             # Counts of topics per document + prior: p(t|d)
             p_topic_g_doc = self.n_peak_tokens_doc_by_topic[doc, :] + self.alpha
 
+            # Reshape from (ntopics,) to (nregions, ntopics) with duplicated rows
+            p_topic_g_doc = np.array([p_topic_g_doc] * self.n_regions)
+
             # Compute p(subregion | document): p(r|d) ~ p(r|t) * p(t|d)
             # [R x T] array of probs
-            p_region_g_doc = np.ones([self.n_regions, 1]) * p_topic_g_doc * p_region_g_topic
+            p_region_g_doc = p_topic_g_doc * p_region_g_topic
 
             # --- Compute the multinomial probability: p(z|y) ---
             # Need the current vector of all z and y assignments for current doc
@@ -417,13 +418,15 @@ class Model(object):
             # of y assigned to each topic, plus constant \gamma
             doc_y_counts = self.n_peak_tokens_doc_by_topic[doc, :] + self.gamma
             doc_z_counts = self.n_word_tokens_doc_by_topic[doc, :]
-            p_z_y = np.zeros([1, self.n_topics])
-            p_z_y[:] = self._compute_prop_multinomial_from_zy_vectors(doc_z_counts, doc_y_counts)
+            p_peak_g_topic = self._compute_prop_multinomial_from_zy_vectors(doc_z_counts,
+                                                                            doc_y_counts)
+
+            # Reshape from (ntopics,) to (nregions, ntopics) with duplicated rows
+            p_peak_g_topic = np.array([p_peak_g_topic] * self.n_regions)
 
             ## Get the full sampling distribution:
             # [R x T] array containing the proportional probability of all y/r combinations
-            probs_pdf = p_x_subregions * p_region_g_doc * np.dot(np.ones([self.n_regions, 1]),
-                                                                 p_z_y)
+            probs_pdf = p_x_subregions * p_region_g_doc * p_peak_g_topic
 
             # Convert from a [R x T] matrix into a [R*T x 1] array we can sample from
             probs_pdf = probs_pdf.transpose().ravel()
@@ -435,9 +438,7 @@ class Model(object):
             # for the peak token) from the sampling distribution
             # Returns a [1 x R*T] vector with a '1' in location that was sampled
             vec = np.random.multinomial(1, probs_pdf)  # pylint: disable=no-member
-            vec_loc = np.where(vec)  # Converts the indicator vector into a linear
-                                     # index value (stored in a tuple)
-            sample_idx = vec_loc[0][0]  # Extract the linear index value from the tuple
+            sample_idx = np.where(vec)[0][0]  # Extract linear index value from vector
 
             # Transform the linear index of the sampled element into the
             # subregion/topic (r/y) assignment indices
@@ -451,8 +452,8 @@ class Model(object):
                                                                     # matrix
             self.n_peak_tokens_doc_by_topic[doc, topic] += 1  # Increment count in
                                                               # Document x Topic count matrix
-            self.peak_topic_idx[i_peak_token] = topic  # Update y->topic assignment
-            self.peak_region_idx[i_peak_token] = region  # Update y->subregion assignment
+            self.peak_topic_idx[i_ptoken] = topic  # Update y->topic assignment
+            self.peak_region_idx[i_ptoken] = region  # Update y->subregion assignment
 
     def _update_regions(self):
         """
@@ -505,7 +506,6 @@ class Model(object):
             # subregions 1 & 2, constraining the means to be symmetric w.r.t.
             # the origin along x-dimension
             for i_topic in range(self.n_topics):
-
                 # -- Get all peaks assigned to current topic & subregion 1 --
                 idx1 = (self.peak_topic_idx == i_topic) & (self.peak_region_idx == 0)
                 vals1 = self.dataset.peak_vals[idx1]
@@ -651,8 +651,8 @@ class Model(object):
         x_loglikely = 0  # Initialize variable tracking total loglikelihood of all x tokens
 
         # Go over all observed peaks and add p(x|model) to running total
-        for i_peak_token in range(self.n_peak_tokens):
-            doc = self.dataset.ptoken_doc_idx[i_peak_token] - 1  # convert didx from 1-idx to 0-idx
+        for i_ptoken in range(self.n_peak_tokens):
+            doc = self.dataset.ptoken_doc_idx[i_ptoken] - 1  # convert didx from 1-idx to 0-idx
             p_x = 0  # Running total for p(x|d) across subregions:
                      # Compute p(x_i|d) for each subregion separately and then
                      # sum across the subregions
@@ -667,7 +667,7 @@ class Model(object):
                 p_region_g_doc = p_topic_g_doc * p_region_g_topic
 
                 # p(x|r) - p(x|subregion)
-                p_x_r = peak_probs[i_peak_token, :, j_region]
+                p_x_r = peak_probs[i_ptoken, :, j_region]
 
                 # p(x|subregion,doc) = sum_topics ( p(subregion|doc) * p(x|subregion) )
                 p_x_rd = np.dot(p_region_g_doc, p_x_r)
@@ -687,10 +687,10 @@ class Model(object):
         p_wtoken_g_doc = np.dot(docprobs_z, np.transpose(wordprobs))
 
         # Go over all observed word tokens and add p(w|model) to running total
-        for i_word_token in range(len(self.dataset.wtoken_word_idx)):
-            word_token = self.dataset.wtoken_word_idx[i_word_token] - 1  # convert wtoken_word_idx
+        for i_wtoken in range(len(self.dataset.wtoken_word_idx)):
+            word_token = self.dataset.wtoken_word_idx[i_wtoken] - 1  # convert wtoken_word_idx
                                                                     # from 1-idx to 0-idx
-            doc = self.dataset.wtoken_doc_idx[i_word_token] - 1  # convert wtoken_doc_idx from
+            doc = self.dataset.wtoken_doc_idx[i_wtoken] - 1  # convert wtoken_doc_idx from
                                                             # 1-idx to 0-idx
             p_wtoken = p_wtoken_g_doc[doc, word_token]  # Probability of sampling current
                                                         # w token from d
@@ -884,13 +884,13 @@ class Model(object):
             fid.write('Peak_X,Peak_Y,Peak_Z,Topic_Assignment,Subregion_Assignment\n')
 
             # For each peak-token, print(out its coordinates and current topic/subregion assignment
-            for i_peak_token in range(self.n_peak_tokens):
+            for i_ptoken in range(self.n_peak_tokens):
                 # Note that we convert topic/subregion indices to 1-base idx
-                outstr = '{0},{1},{2},{3},{4}\n'.format(self.dataset.peak_vals[i_peak_token, 0],
-                                                        self.dataset.peak_vals[i_peak_token, 1],
-                                                        self.dataset.peak_vals[i_peak_token, 2],
-                                                        self.peak_topic_idx[i_peak_token]+1,
-                                                        self.peak_region_idx[i_peak_token]+1)
+                outstr = '{0},{1},{2},{3},{4}\n'.format(self.dataset.peak_vals[i_ptoken, 0],
+                                                        self.dataset.peak_vals[i_ptoken, 1],
+                                                        self.dataset.peak_vals[i_ptoken, 2],
+                                                        self.peak_topic_idx[i_ptoken]+1,
+                                                        self.peak_region_idx[i_ptoken]+1)
                 fid.write(outstr)
 
     def _save_topic_word_counts(self, outfilestr):
