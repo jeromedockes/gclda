@@ -70,6 +70,56 @@ Examples
 
     <div style='clear:both'></div>
 
+.. _examples-index:
+
+Examples from Rubin et al. (2017)
+======================================
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Encode text from Rubin et al. (2017) into images.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/01_paper/images/thumb/sphx_glr_plot_paper_encoding_thumb.png
+
+        :ref:`sphx_glr_auto_examples_01_paper_plot_paper_encoding.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/01_paper/plot_paper_encoding
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Decode ROIs from Rubin et al. (2017).">
+
+.. only:: html
+
+    .. figure:: /auto_examples/01_paper/images/thumb/sphx_glr_plot_paper_decoding_discrete_thumb.png
+
+        :ref:`sphx_glr_auto_examples_01_paper_plot_paper_decoding_discrete.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/01_paper/plot_paper_decoding_discrete
+.. raw:: html
+
+    <div style='clear:both'></div>
+
 
 
 .. only :: html
