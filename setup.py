@@ -12,6 +12,7 @@ with open('gclda/version.py') as f:
 # fetch requirements from file
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
+requirements = [r for r in requirements if not '/' in r]
 
 config = {
     'description': 'Python gcLDA Implementation',
