@@ -21,7 +21,7 @@ from nilearn import plotting
 from nltools.mask import create_sphere
 
 from gclda.model import Model
-from gclda.decode import Decoder
+from gclda.decode import decode_roi
 from gclda.utils import get_resource_path
 
 ###############################################################################
@@ -29,7 +29,6 @@ from gclda.utils import get_resource_path
 # ----------------------------------
 model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
 model = Model.load(model_file)
-decoder = Decoder(model)
 
 ###############################################################################
 # Create region of interest (ROI) image
@@ -45,7 +44,7 @@ fig = plotting.plot_roi(roi_img, display_mode='ortho',
 ###############################################################################
 # Decode ROI
 # -----------
-df, topic_weights = decoder.decode_roi(roi_img)
+df, topic_weights = decode_roi(model, roi_img)
 
 ###############################################################################
 # Get associated terms

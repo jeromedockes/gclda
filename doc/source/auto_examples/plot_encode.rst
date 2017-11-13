@@ -27,7 +27,7 @@ Start with the necessary imports
     from nilearn import plotting
 
     from gclda.model import Model
-    from gclda.decode import Decoder
+    from gclda.decode import encode
     from gclda.utils import get_resource_path
 
 
@@ -41,7 +41,7 @@ Start with the necessary imports
     Bootstrapped meta-analyses are enabled.
 
 
-Load model and initialize decoder
+Load model
 ----------------------------------
 
 
@@ -50,7 +50,6 @@ Load model and initialize decoder
 
     model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
     model = Model.load(model_file)
-    decoder = Decoder(model)
 
 
 
@@ -66,7 +65,7 @@ Encode text into image
 .. code-block:: python
 
     text = 'painful stimulation during a language task'
-    text_img, topic_weights = decoder.encode(text)
+    text_img, topic_weights = encode(model, text)
 
 
 
@@ -115,7 +114,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  39.709 seconds)
+**Total running time of the script:** ( 0 minutes  36.535 seconds)
 
 
 

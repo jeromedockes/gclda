@@ -6,7 +6,7 @@ Dirichlet Allocation.
 """
 from .dataset import Dataset
 from .model import Model
-from .decode import Decoder
+from .decode import decode_roi
 from .version import __version__
 from .due import due, BibTeX
 
@@ -32,3 +32,4 @@ due.cite(BibTeX('@incollection{NIPS2016_6274,'\
 
 # Cleanup
 del due, BibTeX
+del Dataset, Model, decode_roi

@@ -28,7 +28,7 @@ Start with the necessary imports
     from nltools.mask import create_sphere
 
     from gclda.model import Model
-    from gclda.decode import Decoder
+    from gclda.decode import decode_roi
     from gclda.utils import get_resource_path
 
 
@@ -46,7 +46,6 @@ Load model and initialize decoder
 
     model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
     model = Model.load(model_file)
-    decoder = Decoder(model)
 
 
 
@@ -85,7 +84,7 @@ Decode ROI
 
 .. code-block:: python
 
-    df, topic_weights = decoder.decode_roi(roi_img)
+    df, topic_weights = decode_roi(model, roi_img)
 
 
 
@@ -146,7 +145,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  33.154 seconds)
+**Total running time of the script:** ( 0 minutes  34.843 seconds)
 
 
 

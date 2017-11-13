@@ -28,7 +28,7 @@ Start with the necessary imports
     from nilearn import plotting
 
     from gclda.model import Model
-    from gclda.decode import Decoder
+    from gclda.decode import decode_continuous
     from gclda.utils import get_resource_path
 
 
@@ -46,7 +46,6 @@ Load model and initialize decoder
 
     model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
     model = Model.load(model_file)
-    decoder = Decoder(model)
 
 
 
@@ -83,7 +82,7 @@ Decode ROI
 
 .. code-block:: python
 
-    df, topic_weights = decoder.decode_continuous(img_to_decode)
+    df, topic_weights = decode_continuous(model, img_to_decode)
 
 
 
@@ -144,7 +143,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  31.390 seconds)
+**Total running time of the script:** ( 0 minutes  33.809 seconds)
 
 
 

@@ -21,7 +21,7 @@ import nibabel as nib
 from nilearn import plotting
 
 from gclda.model import Model
-from gclda.decode import Decoder
+from gclda.decode import decode_continuous
 from gclda.utils import get_resource_path
 
 ###############################################################################
@@ -29,7 +29,6 @@ from gclda.utils import get_resource_path
 # ----------------------------------
 model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
 model = Model.load(model_file)
-decoder = Decoder(model)
 
 ###############################################################################
 # Read in image to decode
@@ -43,7 +42,7 @@ fig = plotting.plot_stat_map(img_to_decode, display_mode='z',
 ###############################################################################
 # Decode ROI
 # -----------
-df, topic_weights = decoder.decode_continuous(img_to_decode)
+df, topic_weights = decode_continuous(model, img_to_decode)
 
 ###############################################################################
 # Get associated terms
