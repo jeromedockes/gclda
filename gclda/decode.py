@@ -198,11 +198,11 @@ def encode(model, text, out_file=None, topic_priors=None, prior_weight=1.):
     Derive topic weights:
 
     .. math ::
-        P_{tw} = p(t = i|w = j)
+        P_{tw} &= p(t = i|w = j)
 
-        P_{tw} = \frac{p(w = j|t = i) * p(t = i)}{p(w)}
+               &= \frac{p(w = j|t = i) * p(t = i)}{p(w)}
 
-        P_{tw} = \frac{\Phi_{ji}}{\sum_{i=1}^{T} \Phi_{ji}}
+               &= \frac{\Phi_{ji}}{\sum_{i=1}^{T} \Phi_{ji}}
 
         \tau_{t} = \sum_{w} P_{tw}
 
@@ -212,6 +212,7 @@ def encode(model, text, out_file=None, topic_priors=None, prior_weight=1.):
         values = \tau_{t} \cdot A
 
     Summary:
+
     1.  Compute p_topic_g_word.
             - p_topic_g_word = p_word_g_topic * p_topic / p_word
             - p_topic is uniform (1/n topics)
