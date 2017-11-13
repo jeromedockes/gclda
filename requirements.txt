@@ -7,4 +7,6 @@ duecredit>=0.6.1
 nibabel>=2.1.0
 scikit_learn>=0.19b2
 future>=0.16.0
+numpydoc
 nilearn
+-e git://github.com/ljchang/nltools.git@a2c63c1a331cf9061710468a369dbc611c3fb8c9

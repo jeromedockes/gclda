@@ -58,7 +58,6 @@ def decode_roi(model, roi, topic_priors=None, prior_weight=1.):
 
     dset_aff = model.dataset.mask_img.affine
     if not np.array_equal(roi.affine, dset_aff):
-
         raise ValueError('Input roi must have same affine as mask img:'
                          '\n{0}\n{1}'.format(np.array2string(roi.affine),
                                              np.array2string(dset_aff)))
