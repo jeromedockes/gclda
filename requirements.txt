@@ -12,4 +12,4 @@ nilearn
 sphinx_gallery
 sphinx_rtd_theme
 https://github.com/tsalo/neurosynth/archive/py3.zip#egg=neurosynth
-git://github.com/ljchang/nltools.git@a2c63c1a331cf9061710468a369dbc611c3fb8c9#egg=nltools
+https://github.com/ljchang/nltools/archive/0.3.2.zip#egg=nltools
