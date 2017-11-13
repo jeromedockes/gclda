@@ -2,25 +2,25 @@
 # ex: set sts=4 ts=4 sw=4 et:
 """
 
-.. _pap3:
+.. _plot1:
 
 =========================================
- Paper Encoding
+ Show topic distributions
 =========================================
 
-Encode text from Rubin et al. (2017) into images.
+Plot topic figures and show them.
 
 """
 ###############################################################################
 # Start with the necessary imports
 # --------------------------------
 from os.path import join
+from shutil import rmtree
 import matplotlib.pyplot as plt
 
-from nilearn import plotting
+from IPython.display import Image, display
 
 from gclda.model import Model
-from gclda.decode import encode
 from gclda.utils import get_resource_path
 
 ###############################################################################
@@ -28,31 +28,29 @@ from gclda.utils import get_resource_path
 # ----------------------------------
 model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
 model = Model.load(model_file)
-model.display_model_summary()
 
 ###############################################################################
-# First text
-# ----------------------
-text = 'motor'
-text_img, _ = encode(model, text)
-fig = plotting.plot_stat_map(text_img, display_mode='z',
-                             threshold=0.00001,
-                             cut_coords=[-18, 4, 32, 60])
+# Save topic figures
+# -----------------------
+out_dir = 'temp/'
+model.save_topic_figures(outputdir=out_dir)
 
 ###############################################################################
-# Second text
-# ---------------------
-text = 'effort difficult demands'
-text_img, _ = encode(model, text)
-fig = plotting.plot_stat_map(text_img, display_mode='z',
-                             threshold=0.00001,
-                             cut_coords=[-30, -4, 26, 50])
+# Show first topic figure
+# -----------------------
+display(Image(filename=join(out_dir, 'Topic_11.png')))
 
 ###############################################################################
-# Third text
-# ------------------
-text = 'painful stimulation during a language task'
-text_img, _ = encode(model, text)
-fig = plotting.plot_stat_map(text_img, display_mode='z',
-                             threshold=0.00001,
-                             cut_coords=[-2, 22, 44, 66])
+# Show second topic figure
+# ------------------------
+display(Image(filename=join(out_dir, 'Topic_59.png')))
+
+###############################################################################
+# Show third topic figure
+# -----------------------
+display(Image(filename=join(out_dir, 'Topic_150.png')))
+
+###############################################################################
+# Clean up generated files
+# ------------------------
+rmtree(out_dir)

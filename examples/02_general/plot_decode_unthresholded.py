@@ -33,7 +33,7 @@ model = Model.load(model_file)
 ###############################################################################
 # Read in image to decode
 # --------------------------------------
-file_to_decode = 'data/faces_specificity_z.nii.gz'
+file_to_decode = '../data/faces_specificity_z.nii.gz'
 img_to_decode = nib.load(file_to_decode)
 fig = plotting.plot_stat_map(img_to_decode, display_mode='z',
                              threshold=3.290527,
