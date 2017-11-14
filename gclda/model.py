@@ -32,45 +32,45 @@ class Model(object):
     dataset : :obj:`gclda.dataset.Dataset`
         Dataset object containing data needed for model.
 
-    n_topics : int, optional
+    n_topics : :obj:`int`, optional
         Number of topics to generate in model. The default is 100.
 
-    n_regions : int, optional
+    n_regions : :obj:`int`, optional
         Number of subregions per topic (>=1). The default is 2.
 
-    alpha : float, optional
+    alpha : :obj:`float`, optional
         Prior count on topics for each document. The default is 0.1.
 
-    beta : float, optional
+    beta : :obj:`float`, optional
         Prior count on word-types for each topic. The default is 0.01.
 
-    gamma : float, optional
+    gamma : :obj:`float`, optional
         Prior count added to y-counts when sampling z assignments. The
         default is 0.01.
 
-    delta : float, optional
+    delta : :obj:`float`, optional
         Prior count on subregions for each topic. The default is 1.0.
 
-    dobs : int, optional
+    dobs : :obj:`int`, optional
         Spatial region 'default observations' (# observations weighting
         Sigma estimates in direction of default 'roi_size' value). The
         default is 25.
 
-    roi_size : float, optional
+    roi_size : :obj:`float`, optional
         Default spatial 'region of interest' size (default value of
         diagonals in covariance matrix for spatial distribution, which the
         distributions are biased towards). The default is 50.0.
 
-    symmetric : bool, optional
+    symmetric : :obj:`bool`, optional
         Whether or not to use symmetry constraint on subregions. Symmetry
         requires n_regions = 2. The default is False.
 
-    seed_init : int, optional
+    seed_init : :obj:`int`, optional
         Initial value of random seed. The default is 1.
 
     Attributes
     ----------
-    model_name : str
+    model_name : :obj:`str`
         Identifier (based on parameter values) for the model.
 
     wtoken_topic_idx : :obj:`numpy.ndarray` of :obj:`numpy.int64`
@@ -278,7 +278,7 @@ class Model(object):
 
         Parameters
         ----------
-        loglikely_freq : int, optional
+        loglikely_freq : :obj:`int`, optional
             The frequency with which log-likelihood is updated. Default value
             is 1 (log-likelihood is updated every iteration).
 
@@ -321,7 +321,7 @@ class Model(object):
 
         Parameters
         ----------
-        randseed : int
+        randseed : :obj:`int`
             Random seed for this iteration.
         """
         # --- Seed random number generator
@@ -368,7 +368,7 @@ class Model(object):
 
         Parameters
         ----------
-        randseed : int
+        randseed : :obj:`int`
             Random seed for this iteration.
         """
         # --- Seed random number generator
@@ -596,18 +596,18 @@ class Model(object):
 
         Parameters
         ----------
-        update_vectors : bool, optional
+        update_vectors : :obj:`bool`, optional
             Whether to update model's log-likelihood vectors or not.
 
         Returns
         -------
-        x_loglikely : float
+        x_loglikely : :obj:`float`
             Total log-likelihood of all peak tokens.
 
-        w_loglikely : float
+        w_loglikely : :obj:`float`
             Total log-likelihood of all word tokens.
 
-        tot_loglikely : float
+        tot_loglikely : :obj:`float`
             Total log-likelihood of peak + word tokens.
 
         References
@@ -845,10 +845,10 @@ class Model(object):
 
         Parameters
         ----------
-        outputdir : str
+        outputdir : :obj:`str`
             The name of the output directory.
 
-        n_top_words : int, optional
+        n_top_words : :obj:`int`, optional
             The number of words associated with each topic to report in topic
             word probabilities file.
         """
@@ -876,7 +876,7 @@ class Model(object):
 
         Parameters
         ----------
-        outfilestr : str
+        outfilestr : :obj:`str`
             The name of the output file.
         """
         with open(outfilestr, 'w+') as fid:
@@ -899,7 +899,7 @@ class Model(object):
 
         Parameters
         ----------
-        outfilestr : str
+        outfilestr : :obj:`str`
             The name of the output file.
         """
         with open(outfilestr, 'w+') as fid:
@@ -927,10 +927,10 @@ class Model(object):
 
         Parameters
         ----------
-        outfilestr : str
+        outfilestr : :obj:`str`
             The name of the output file.
 
-        n_top_words : int, optional
+        n_top_words : :obj:`int`, optional
             The number of top words to be written out for each topic.
         """
         with open(outfilestr, 'w+') as fid:
@@ -969,14 +969,14 @@ class Model(object):
 
         Parameters
         ----------
-        outputdir : str
+        outputdir : :obj:`str`
             Output directory for topic figures.
 
-        backgroundpeakfreq : int, optional
+        backgroundpeakfreq : :obj:`int`, optional
             Determines what proportion of peaks we show in the background of
             each figure. Default = 10.
 
-        n_top_words : int, optional
+        n_top_words : :obj:`int`, optional
             The number of words per topic to include in the figures. Default = 12.
         """
         # If output directory doesn't exist, make it
@@ -1113,7 +1113,7 @@ class Model(object):
 
         Parameters
         ----------
-        debug : bool, optional
+        debug : obj:`bool`, optional
             Setting debug to True will print out additional information useful
             for debugging the model. Default = False.
         """

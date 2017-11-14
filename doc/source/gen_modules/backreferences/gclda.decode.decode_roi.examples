@@ -1,0 +1,40 @@
+
+
+Examples using ``gclda.decode.decode_roi``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Decode ROIs from Rubin et al. (2017).">
+
+.. only:: html
+
+    .. figure:: /auto_examples/01_paper/images/thumb/sphx_glr_plot_paper_decoding_discrete_thumb.png
+
+        :ref:`sphx_glr_auto_examples_01_paper_plot_paper_decoding_discrete.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_01_paper_plot_paper_decoding_discrete.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.decode_roi.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_decode_roi_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_decode_roi.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_decode_roi.py`

@@ -26,7 +26,7 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
 
     This function produces four files (word_indices.txt, word_labels.txt,
     peak_indices.txt, and pmids.txt) in a specified folder
-    ({out_dir}/{dataset_label}), using data from a Neurosynth dataset and
+    (``out_dir``/``dataset_label``), using data from a Neurosynth dataset and
     associated abstracts. These four files are necessary for creating a Dataset
     instance and running gcLDA.
 
@@ -35,39 +35,39 @@ def import_neurosynth(neurosynth_dataset, dataset_label, out_dir='.',
     neurosynth_dataset : :obj:`neurosynth.base.dataset.Dataset`
         A Neurosynth Dataset object containing data needed by gcLDA.
 
-    dataset_label : str
+    dataset_label : :obj:`str`
         The name of the gcLDA dataset to be created. A folder will be created in
-        `out_dir` named after the dataset and output files will be saved there.
+        ``out_dir`` named after the dataset and output files will be saved there.
 
-    out_dir : str, optional
+    out_dir : :obj:`str`, optional
         Output directory. Parent folder of a new folder named after
-        `dataset_label` where output files will be saved. By default, it uses
+        ``dataset_label`` where output files will be saved. By default, it uses
         the current directory.
 
-    counts_file : str, optional
+    counts_file : :obj:`str`, optional
         A tab-delimited text file containing feature counts for the dataset.
         The first column is 'pmid', used for identifying articles. Other columns
         are features (e.g., unigrams and bigrams from Neurosynth), where each
         value is the number of times the feature is found in a given article.
         This file is different from the features.txt file provided by
         Neurosynth, as it should contain counts instead of tf-idf frequencies,
-        but it should have the same format. Only one of `counts_file`,
-        `abstracts_file`, and `email` needs to be specified.
+        but it should have the same format. Only one of ``counts_file``,
+        ``abstracts_file``, and ``email`` needs to be specified.
 
-    abstracts_file : str, optional
+    abstracts_file : :obj:`str`, optional
         A csv file containing abstracts of articles in the database. The first
         column is 'pmid', used for identifying articles. The second column is
-        'abstract' and contains the article's abstract. The `abstracts_file` can
-        be created using `download_abstracts` in the Neurosynth Python package.
-        Only one of `counts_file`, `abstracts_file`, and `email` needs to be
+        'abstract' and contains the article's abstract. The ``abstracts_file`` can
+        be created using ``download_abstracts`` in the Neurosynth Python package.
+        Only one of ``counts_file``, ``abstracts_file``, and ``email`` needs to be
         specified.
 
     email : :obj:`str`, optional
-        A valid email address. If neither `counts_file` or `abstracts_file` is
-        provided, then `import_neurosynth` will attempt to download article
-        abstracts using Neurosynth's `download_abstracts` function. This calls
+        A valid email address. If neither ``counts_file`` nor ``abstracts_file`` is
+        provided, then ``import_neurosynth`` will attempt to download article
+        abstracts using Neurosynth's ``download_abstracts`` function. This calls
         PubMed to get PMIDs and abstracts, which requires an email address.
-        Only one of `counts_file`, `abstracts_file`, and `email` needs to be
+        Only one of ``counts_file``, ``abstracts_file``, and ``email`` needs to be
         specified.
 
     vocabulary : :obj:`list` of :obj:`str`, optional
@@ -174,24 +174,24 @@ class Dataset(object):
 
     Parameters
     ----------
-    dataset_label : str
+    dataset_label : :obj:`str`
         The name of the gcLDA dataset. Also the name of a subfolder in
-        `data_directory` containing four files (word_indices.txt,
-        word_labels.txt, peak_indices.txt, and pmids.txt) with the data needed
-        to create the dataset.
+        ``data_directory`` containing four files (``word_indices.txt``,
+        ``word_labels.txt``, ``peak_indices.txt``, and ``pmids.txt``) with the
+        data needed to create the dataset.
 
-    data_directory : str
+    data_directory : :obj:`str`
         The path to the folder containing the data. Should contain a
-        subdirectory named after `dataset_label` with files needed to generate
+        subdirectory named after ``dataset_label`` with files needed to generate
         a Dataset.
 
-    mask_file : str, optional
+    mask_file : :obj:`str`, optional
         A brain mask file used to define the voxels included in the dataset. If
         not provided, the mask file used by Neurosynth will be used by default.
 
     Attributes
     ----------
-    dataset_label : str
+    dataset_label : :obj:`str`
         The name of the dataset.
 
     mask_img : :obj:`nibabel.Nifti1Image`
@@ -268,7 +268,7 @@ class Dataset(object):
 
         Parameters
         ----------
-        filename : str
+        filename : :obj:`str`
             Where to save Dataset instance.
         """
         if filename.endswith('z'):
@@ -288,7 +288,7 @@ class Dataset(object):
 
         Parameters
         ----------
-        filename : str
+        filename : :obj:`str`
             File with saved Dataset instance.
 
         Returns
@@ -333,7 +333,7 @@ class Dataset(object):
 
     def view_word_labels(self, n_word_labels=1000):
         """
-        View first `n_word_labels` words in dataset.
+        View first ``n_word_labels`` words in dataset.
         """
         print('First {0} word_labels:'.format(n_word_labels))
         for i in range(min(n_word_labels, len(self.word_labels))):
@@ -343,7 +343,7 @@ class Dataset(object):
 
     def view_doc_labels(self, n_pmids=1000):
         """
-        View first `n_pmids` PMIDs in dataset.
+        View first ``n_pmids`` PMIDs in dataset.
         """
         print('First {0} pmids:'.format(n_pmids))
         for i in range(min(n_pmids, len(self.pmids))):
@@ -353,7 +353,7 @@ class Dataset(object):
 
     def view_word_indices(self, n_word_indices=100):
         """
-        View first `n_word_indices` word indices.
+        View first ``n_word_indices`` word indices.
         """
         print('First {0} wtoken_doc_idx, wtoken_word_idx:'.format(n_word_indices))
         for i in range(min(n_word_indices, len(self.wtoken_word_idx))):
@@ -363,7 +363,7 @@ class Dataset(object):
 
     def view_peak_indices(self, n_peak_indices=100):
         """
-        View first `n_peak_indices` peak indices.
+        View first ``n_peak_indices`` peak indices.
         """
         print('Peak Locs Dimensions: {0}'.format(self.peak_vals.shape))
         print('First {0} ptoken_doc_idx, peak_x, peak_y, peak_z:'.format(n_peak_indices))

@@ -1,0 +1,130 @@
+
+
+Examples using ``gclda.utils.get_resource_path``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Encode text from Rubin et al. (2017) into images.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/01_paper/images/thumb/sphx_glr_plot_paper_encoding_thumb.png
+
+        :ref:`sphx_glr_auto_examples_01_paper_plot_paper_encoding.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_01_paper_plot_paper_encoding.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Decode ROIs from Rubin et al. (2017).">
+
+.. only:: html
+
+    .. figure:: /auto_examples/01_paper/images/thumb/sphx_glr_plot_paper_decoding_discrete_thumb.png
+
+        :ref:`sphx_glr_auto_examples_01_paper_plot_paper_decoding_discrete.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_01_paper_plot_paper_decoding_discrete.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot topic figures and show them.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_show_topic_figures_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of dataset.Dataset and model.Model.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_train_model_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_train_model.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_train_model.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.encode.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_encode_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_encode.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_encode.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.decode_continuous.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_decode_unthresholded_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_decode_unthresholded.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_decode_unthresholded.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.decode_roi.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_decode_roi_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_decode_roi.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_decode_roi.py`

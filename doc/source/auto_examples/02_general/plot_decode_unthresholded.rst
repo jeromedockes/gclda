@@ -143,7 +143,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  48.581 seconds)
+**Total running time of the script:** ( 0 minutes  28.723 seconds)
 
 
 

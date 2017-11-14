@@ -1,0 +1,22 @@
+
+
+Examples using ``gclda.decode.decode_continuous``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.decode_continuous.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_decode_unthresholded_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_decode_unthresholded.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_decode_unthresholded.py`

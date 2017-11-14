@@ -1,0 +1,22 @@
+
+
+Examples using ``gclda.dataset.Dataset``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of dataset.Dataset and model.Model.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_train_model_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_train_model.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_train_model.py`

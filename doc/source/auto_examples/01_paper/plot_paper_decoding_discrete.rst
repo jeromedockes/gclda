@@ -220,7 +220,7 @@ Temporoparietal, left superior temporal sulcus, and left inferior frontal gyrus 
     auditory     0.005310
 
 
-**Total running time of the script:** ( 1 minutes  16.101 seconds)
+**Total running time of the script:** ( 0 minutes  55.178 seconds)
 
 
 

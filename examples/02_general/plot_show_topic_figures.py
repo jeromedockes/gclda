@@ -16,9 +16,8 @@ Plot topic figures and show them.
 # --------------------------------
 from os.path import join
 from shutil import rmtree
-import matplotlib.pyplot as plt
 
-from IPython.display import Image, display
+from IPython.display import Image
 
 from gclda.model import Model
 from gclda.utils import get_resource_path
@@ -38,17 +37,17 @@ model.save_topic_figures(outputdir=out_dir)
 ###############################################################################
 # Show first topic figure
 # -----------------------
-display(Image(filename=join(out_dir, 'Topic_11.png')))
+Image(filename=join(out_dir, 'Topic_11.png'), embed=True)
 
 ###############################################################################
 # Show second topic figure
 # ------------------------
-display(Image(filename=join(out_dir, 'Topic_59.png')))
+Image(filename=join(out_dir, 'Topic_59.png'), embed=True)
 
 ###############################################################################
 # Show third topic figure
 # -----------------------
-display(Image(filename=join(out_dir, 'Topic_150.png')))
+Image(filename=join(out_dir, 'Topic_150.png'), embed=True)
 
 ###############################################################################
 # Clean up generated files

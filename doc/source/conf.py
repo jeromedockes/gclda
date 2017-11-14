@@ -39,14 +39,14 @@ except:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'numpydoc',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinx_gallery.gen_gallery'
-
+    'sphinx_gallery.gen_gallery',
 ]
 
 # pngmath / imgmath compatibility layer for different sphinx versions
@@ -57,15 +57,36 @@ if LooseVersion(sphinx.__version__) < LooseVersion('1.4'):
 else:
     extensions.append('sphinx.ext.imgmath')
 
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {
+    'http://docs.python.org/3.5': None,
+    'http://docs.scipy.org/doc/numpy': None,
+    'http://docs.scipy.org/doc/scipy/reference': None,
+    'http://matplotlib.org/': None,
+    'http://scikit-learn.org/0.17': None,
+    'http://nipy.org/nibabel/': None,
+    'http://pandas.pydata.org/pandas-docs/stable/': None,
+    'http://neurosynth.readthedocs.io/en/latest/': None,
+}
+
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : '../../examples',
+    'examples_dirs'     : '../../examples',
     # path where to save gallery generated examples
-    'gallery_dirs'  : 'auto_examples',
-    'backreferences_dir': False}
+    'gallery_dirs'      : 'auto_examples',
+    'backreferences_dir': 'gen_modules/backreferences',
+    # Modules for which function level galleries are created.  In
+    # this case sphinx_gallery and numpy in a tuple of strings.
+    'doc_module'        : ('gclda', 'numpy'),
+    }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+
+# generate autosummary even if no references
+autosummary_generate = True
+autodoc_default_flags = ['members', 'inherited-members']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -270,7 +291,6 @@ man_pages = [
 # If true, show URL addresses after external links.
 #man_show_urls = False
 
-
 # -- Options for Texinfo output -------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
@@ -306,7 +326,3 @@ def setup(app):
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}

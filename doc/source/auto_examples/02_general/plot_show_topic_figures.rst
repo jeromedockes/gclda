@@ -23,9 +23,8 @@ Start with the necessary imports
 
     from os.path import join
     from shutil import rmtree
-    import matplotlib.pyplot as plt
 
-    from IPython.display import Image, display
+    from IPython.display import Image
 
     from gclda.model import Model
     from gclda.utils import get_resource_path
@@ -75,17 +74,12 @@ Show first topic figure
 
 .. code-block:: python
 
-    display(Image(filename=join(out_dir, 'Topic_11.png')))
+    Image(filename=join(out_dir, 'Topic_11.png'), embed=True)
 
 
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- Out::
-
-    <IPython.core.display.Image object>
 
 
 Show second topic figure
@@ -95,17 +89,12 @@ Show second topic figure
 
 .. code-block:: python
 
-    display(Image(filename=join(out_dir, 'Topic_59.png')))
+    Image(filename=join(out_dir, 'Topic_59.png'), embed=True)
 
 
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- Out::
-
-    <IPython.core.display.Image object>
 
 
 Show third topic figure
@@ -115,17 +104,12 @@ Show third topic figure
 
 .. code-block:: python
 
-    display(Image(filename=join(out_dir, 'Topic_150.png')))
+    Image(filename=join(out_dir, 'Topic_150.png'), embed=True)
 
 
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- Out::
-
-    <IPython.core.display.Image object>
 
 
 Clean up generated files
@@ -142,7 +126,7 @@ Clean up generated files
 
 
 
-**Total running time of the script:** ( 5 minutes  27.771 seconds)
+**Total running time of the script:** ( 2 minutes  59.853 seconds)
 
 
 

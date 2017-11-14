@@ -4,7 +4,7 @@
 
 
 
-.. _enc1:
+.. _mod1:
 
 =========================================
  Load dataset and train model
@@ -152,7 +152,7 @@ Run model (10 iterations)
              Peak-Dimensions (n_peak_dims) = 3
 
 
-**Total running time of the script:** ( 1 minutes  48.308 seconds)
+**Total running time of the script:** ( 1 minutes  4.177 seconds)
 
 
 

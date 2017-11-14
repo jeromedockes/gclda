@@ -27,13 +27,13 @@ def decode_roi(model, roi, topic_priors=None, prior_weight=1.):
     ----------
     model : :obj:`gclda.model.Model`
         Model object needed for decoding.
-    roi : :obj:`nibabel.Nifti1Image` or str
+    roi : :obj:`nibabel.Nifti1Image` or :obj:`str`
         Binary image to decode into text. If string, path to a file with
         the binary image.
     topic_priors : :obj:`numpy.ndarray` of :obj:`float`, optional
         A 1d array of size (n_topics) with values for topic weighting.
         If None, no weighting is done. Default is None.
-    prior_weight : float, optional
+    prior_weight : :obj:`float`, optional
         The weight by which the prior will affect the decoding.
         Default is 1.
 
@@ -102,14 +102,14 @@ def decode_continuous(model, image, topic_priors=None, prior_weight=1.):
     ----------
     model : :obj:`gclda.model.Model`
         Model object needed for decoding.
-    image : :obj:`nibabel.Nifti1Image` or str
+    image : :obj:`nibabel.Nifti1Image` or :obj:`str`
         Whole-brain image to decode into text. Must be in same space as
         model and dataset. Model's template available in
         `model.dataset.mask_img`.
     topic_priors : :obj:`numpy.ndarray` of :obj:`float`, optional
         A 1d array of size (n_topics) with values for topic weighting.
         If None, no weighting is done. Default is None.
-    prior_weight : float, optional
+    prior_weight : :obj:`float`, optional
         The weight by which the prior will affect the decoding.
         Default is 1.
 
@@ -168,14 +168,14 @@ def encode(model, text, out_file=None, topic_priors=None, prior_weight=1.):
     ----------
     model : :obj:`gclda.model.Model`
         Model object needed for decoding.
-    text : str or list
+    text : :obj:`str` or :obj:`list`
         Text to encode into an image.
-    out_file : str, optional
+    out_file : :obj:`str`, optional
         If not None, writes the encoded image to a file.
     topic_priors : :obj:`numpy.ndarray` of :obj:`float`, optional
         A 1d array of size (n_topics) with values for topic weighting.
         If None, no weighting is done. Default is None.
-    prior_weight : float, optional
+    prior_weight : :obj:`float`, optional
         The weight by which the prior will affect the encoding.
         Default is 1.
 

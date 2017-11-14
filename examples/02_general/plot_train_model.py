@@ -2,7 +2,7 @@
 # ex: set sts=4 ts=4 sw=4 et:
 """
 
-.. _enc1:
+.. _mod1:
 
 =========================================
  Load dataset and train model

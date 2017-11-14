@@ -32,7 +32,7 @@ def weight_priors(topic_priors, prior_weight):
     topic_priors : array-like
         The prior weights for topics (n_topics-long array). Scale may be
         arbitrary, as the array will be normalized.
-    prior_weight : float
+    prior_weight : :obj:`float`
         Scalar by which to weight priors.
     """
     if not (isinstance(prior_weight, float) or isinstance(prior_weight, int)):
@@ -76,15 +76,15 @@ def plot_brain(data, underlay, x=0, y=0, z=0):
     underlay : :obj:`nibabel.Nifti1Image`
         Structural scan to use as underlay in figure.
 
-    x : int, optional
+    x : :obj:`int`, optional
         X-coordinate in stereotactic space to use for sagittal view in figure.
         Default is 0.
 
-    y : int, optional
+    y : :obj:`int`, optional
         Y-coordinate in stereotactic space to use for coronal view in figure.
         Default is 0.
 
-    z : int, optional
+    z : :obj:`int`, optional
         Z-coordinate in stereotactic space to use for axial view in figure.
         Default is 0.
 

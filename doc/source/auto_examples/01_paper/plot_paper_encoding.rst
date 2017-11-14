@@ -148,7 +148,7 @@ Third text
 
 
 
-**Total running time of the script:** ( 1 minutes  16.919 seconds)
+**Total running time of the script:** ( 0 minutes  57.437 seconds)
 
 
 
