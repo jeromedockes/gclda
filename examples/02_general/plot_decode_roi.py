@@ -8,7 +8,7 @@
  Decode binary region of interest
 =========================================
 
-An example of decode.Decoder.decode_roi.
+An example of decode.decode_roi.
 
 """
 ###############################################################################

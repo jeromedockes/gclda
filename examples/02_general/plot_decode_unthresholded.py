@@ -8,7 +8,7 @@
  Decode unthresholded map
 ========================================
 
-An example of decode.Decoder.decode_continuous.
+An example of decode.decode_continuous.
 
 """
 ###############################################################################

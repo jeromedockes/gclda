@@ -8,7 +8,7 @@
  Encode text into image
 =========================================
 
-An example of decode.Decoder.encode.
+An example of decode.encode.
 
 """
 ###############################################################################
