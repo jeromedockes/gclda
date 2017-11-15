@@ -10,7 +10,7 @@
  Encode text into image
 =========================================
 
-An example of decode.Decoder.encode.
+An example of decode.encode.
 
 
 
@@ -43,7 +43,8 @@ Load model
 
 .. code-block:: python
 
-    model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
+    model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
+                      'model_200topics_2015Filtered2_10000iters.pklz')
     model = Model.load(model_file)
 
 
@@ -109,7 +110,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  29.275 seconds)
+**Total running time of the script:** ( 0 minutes  33.312 seconds)
 
 
 

@@ -42,7 +42,8 @@ Load model
 
 .. code-block:: python
 
-    model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
+    model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
+                      'model_200topics_2015Filtered2_10000iters.pklz')
     model = Model.load(model_file)
 
 
@@ -126,7 +127,7 @@ Clean up generated files
 
 
 
-**Total running time of the script:** ( 2 minutes  59.853 seconds)
+**Total running time of the script:** ( 3 minutes  33.450 seconds)
 
 
 

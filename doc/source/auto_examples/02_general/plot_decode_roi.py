@@ -8,7 +8,7 @@
  Decode binary region of interest
 =========================================
 
-An example of decode.Decoder.decode_roi.
+An example of decode.decode_roi.
 
 """
 ###############################################################################
@@ -27,7 +27,8 @@ from gclda.utils import get_resource_path
 ###############################################################################
 # Load model and initialize decoder
 # ----------------------------------
-model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
+model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
+                  'model_200topics_2015Filtered2_10000iters.pklz')
 model = Model.load(model_file)
 
 ###############################################################################

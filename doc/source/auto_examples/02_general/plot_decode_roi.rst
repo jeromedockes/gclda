@@ -10,7 +10,7 @@
  Decode binary region of interest
 =========================================
 
-An example of decode.Decoder.decode_roi.
+An example of decode.decode_roi.
 
 
 
@@ -44,7 +44,8 @@ Load model and initialize decoder
 
 .. code-block:: python
 
-    model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
+    model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
+                      'model_200topics_2015Filtered2_10000iters.pklz')
     model = Model.load(model_file)
 
 
@@ -111,17 +112,17 @@ Get associated terms
  Out::
 
     Weight
-    Term                    
-    emotional       0.018283
-    report          0.011139
-    mind            0.009738
-    mentalizing     0.009145
-    self            0.008726
-    theory_of_mind  0.008520
-    emotion         0.007880
-    behavioural     0.007648
-    intentions      0.007629
-    intention       0.007184
+    Term                   
+    mentalizing    0.019629
+    emotional      0.018926
+    social         0.011803
+    mind           0.009781
+    intentions     0.009441
+    mental_states  0.008362
+    intention      0.008273
+    attribution    0.007748
+    number         0.007725
+    emotion        0.007672
 
 
 Plot topic weights
@@ -145,7 +146,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  30.033 seconds)
+**Total running time of the script:** ( 0 minutes  34.487 seconds)
 
 
 

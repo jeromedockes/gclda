@@ -10,7 +10,7 @@
  Decode unthresholded map
 ========================================
 
-An example of decode.Decoder.decode_continuous.
+An example of decode.decode_continuous.
 
 
 
@@ -44,7 +44,8 @@ Load model and initialize decoder
 
 .. code-block:: python
 
-    model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
+    model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
+                      'model_200topics_2015Filtered2_10000iters.pklz')
     model = Model.load(model_file)
 
 
@@ -110,16 +111,16 @@ Get associated terms
 
     Weight
     Term                 
-    visual       0.016861
-    motor        0.015782
-    face         0.011346
-    faces        0.010040
-    emotional    0.007714
-    spatial      0.005245
-    words        0.005074
-    memory       0.004608
-    perceptual   0.004486
-    stimulation  0.003797
+    visual       0.016575
+    motor        0.016180
+    face         0.011059
+    faces        0.010516
+    emotional    0.006950
+    spatial      0.005417
+    memory       0.005155
+    words        0.004586
+    perception   0.004461
+    stimulation  0.004013
 
 
 Plot topic weights
@@ -143,7 +144,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  28.723 seconds)
+**Total running time of the script:** ( 0 minutes  36.817 seconds)
 
 
 

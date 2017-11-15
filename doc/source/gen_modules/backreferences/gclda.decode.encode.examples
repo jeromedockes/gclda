@@ -23,7 +23,7 @@ Examples using ``gclda.decode.encode``
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.encode.">
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.encode.">
 
 .. only:: html
 

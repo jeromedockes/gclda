@@ -109,7 +109,7 @@ General Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.encode.">
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.encode.">
 
 .. only:: html
 
@@ -129,7 +129,7 @@ General Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.decode_continuous.">
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.decode_continuous.">
 
 .. only:: html
 
@@ -149,7 +149,7 @@ General Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.Decoder.decode_roi.">
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.decode_roi.">
 
 .. only:: html
 

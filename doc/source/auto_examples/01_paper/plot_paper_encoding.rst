@@ -47,7 +47,8 @@ Load model
 
 .. code-block:: python
 
-    model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
+    model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
+                      'model_200topics_2015Filtered2_10000iters.pklz')
     model = Model.load(model_file)
     model.display_model_summary()
 
@@ -61,9 +62,9 @@ Load model
 
     --- Model Summary ---
      Current State:
-             Current Iteration   = 3000
+             Current Iteration   = 10000
              Initialization Seed = 1
-             Current Log-Likely  = -11272693.1084
+             Current Log-Likely  = -11268037.3695
      Model Hyper-Parameters:
              Symmetric = True
              n_topics  = 200
@@ -148,7 +149,7 @@ Third text
 
 
 
-**Total running time of the script:** ( 0 minutes  57.437 seconds)
+**Total running time of the script:** ( 1 minutes  19.230 seconds)
 
 
 

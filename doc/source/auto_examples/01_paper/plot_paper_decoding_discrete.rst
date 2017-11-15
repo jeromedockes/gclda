@@ -44,7 +44,8 @@ Load model and initialize decoder
 
 .. code-block:: python
 
-    model_file = join(get_resource_path(), 'models/model_Neurosynth2015Filtered2_temp.pklz')
+    model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
+                      'model_200topics_2015Filtered2_10000iters.pklz')
     model = Model.load(model_file)
     model.display_model_summary()
 
@@ -63,9 +64,9 @@ Load model and initialize decoder
 
     --- Model Summary ---
      Current State:
-             Current Iteration   = 3000
+             Current Iteration   = 10000
              Initialization Seed = 1
-             Current Log-Likely  = -11272693.1084
+             Current Log-Likely  = -11268037.3695
      Model Hyper-Parameters:
              Symmetric = True
              n_topics  = 200
@@ -116,17 +117,17 @@ Temporoparietal seed
  Out::
 
     Weight
-    Term                    
-    emotional       0.018283
-    report          0.011139
-    mind            0.009738
-    mentalizing     0.009145
-    self            0.008726
-    theory_of_mind  0.008520
-    emotion         0.007880
-    behavioural     0.007648
-    intentions      0.007629
-    intention       0.007184
+    Term                   
+    mentalizing    0.019629
+    emotional      0.018926
+    social         0.011803
+    mind           0.009781
+    intentions     0.009441
+    mental_states  0.008362
+    intention      0.008273
+    attribution    0.007748
+    number         0.007725
+    emotion        0.007672
 
 
 Temporoparietal, medial parietal, and dorsomedial prefrontal seeds
@@ -162,17 +163,17 @@ Temporoparietal, medial parietal, and dorsomedial prefrontal seeds
  Out::
 
     Weight
-    Term                    
-    social          0.016362
-    mentalizing     0.009901
-    judgments       0.008965
-    mental_states   0.008272
-    mind            0.008050
-    person          0.007567
-    default         0.006689
-    emotional       0.006650
-    mental_state    0.005719
-    theory_of_mind  0.005574
+    Term                   
+    person         0.009575
+    mentalizing    0.009553
+    social         0.008168
+    mental_states  0.007108
+    emotional      0.006399
+    situation      0.006275
+    mind           0.006087
+    default        0.005371
+    mental         0.005205
+    selectively    0.005099
 
 
 Temporoparietal, left superior temporal sulcus, and left inferior frontal gyrus seeds
@@ -208,19 +209,19 @@ Temporoparietal, left superior temporal sulcus, and left inferior frontal gyrus 
 
     Weight
     Term                 
-    words        0.019430
-    emotional    0.012714
-    word         0.012022
-    language     0.010538
-    semantic     0.006311
-    speech       0.006169
-    gaze         0.005801
-    competition  0.005683
-    selection    0.005417
-    auditory     0.005310
+    words        0.018120
+    word         0.013042
+    emotional    0.012641
+    language     0.010534
+    semantic     0.009955
+    ambiguous    0.008103
+    perception   0.006673
+    mentalizing  0.006174
+    meaning      0.006063
+    knowledge    0.005689
 
 
-**Total running time of the script:** ( 0 minutes  55.178 seconds)
+**Total running time of the script:** ( 1 minutes  5.683 seconds)
 
 
 
