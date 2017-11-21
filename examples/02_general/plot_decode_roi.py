@@ -2,13 +2,13 @@
 # ex: set sts=4 ts=4 sw=4 et:
 """
 
-.. _dec2:
+.. _dec1:
 
 =========================================
  Decode binary region of interest
 =========================================
 
-An example of decode.decode_roi.
+An example of :obj:`gclda.decode.decode_roi`.
 
 """
 ###############################################################################
@@ -34,12 +34,12 @@ model = Model.load(model_file)
 ###############################################################################
 # Create region of interest (ROI) image
 # --------------------------------------
-coords = [[-52, -56, 18]]
+coords = [[-40, -52, -20]]
 radii = [6] * len(coords)
 
 roi_img = create_sphere(coords, radius=radii, mask=model.dataset.mask_img)
 fig = plotting.plot_roi(roi_img, display_mode='ortho',
-                        cut_coords=[-52, -56, 18],
+                        cut_coords=[-40, -52, -20],
                         draw_cross=False)
 
 ###############################################################################

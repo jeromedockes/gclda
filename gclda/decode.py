@@ -77,7 +77,6 @@ def decode_roi(model, roi, topic_priors=None, prior_weight=1.):
     if topic_priors is not None:
         weighted_priors = weight_priors(topic_priors, prior_weight)
         topic_weights *= weighted_priors
-    topic_weights /= np.sum(topic_weights)  # tau_t
 
     # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
     n_word_tokens_per_topic = np.sum(model.n_word_tokens_word_by_topic, axis=0)
@@ -144,7 +143,6 @@ def decode_continuous(model, image, topic_priors=None, prior_weight=1.):
     if topic_priors is not None:
         weighted_priors = weight_priors(topic_priors, prior_weight)
         topic_weights *= weighted_priors
-    topic_weights /= np.sum(topic_weights)  # tau_t
 
     # Multiply topic_weights by topic-by-word matrix (p_word_g_topic).
     n_word_tokens_per_topic = np.sum(model.n_word_tokens_word_by_topic, axis=0)
@@ -246,7 +244,6 @@ def encode(model, text, out_file=None, topic_priors=None, prior_weight=1.):
     if topic_priors is not None:
         weighted_priors = weight_priors(topic_priors, prior_weight)
         topic_weights *= weighted_priors
-    topic_weights /= np.sum(topic_weights)  # tau_t
 
     _, p_voxel_g_topic = model.get_spatial_probs()
     voxel_weights = np.dot(p_voxel_g_topic, topic_weights)

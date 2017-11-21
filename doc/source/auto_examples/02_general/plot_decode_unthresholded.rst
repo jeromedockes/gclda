@@ -4,7 +4,7 @@
 
 
 
-.. _dec4:
+.. _dec2:
 
 ========================================
  Decode unthresholded map
@@ -76,8 +76,8 @@ Read in image to decode
 
 
 
-Decode ROI
------------
+Decode image
+-------------
 
 
 
@@ -110,17 +110,17 @@ Get associated terms
  Out::
 
     Weight
-    Term                 
-    visual       0.016575
-    motor        0.016180
-    face         0.011059
-    faces        0.010516
-    emotional    0.006950
-    spatial      0.005417
-    memory       0.005155
-    words        0.004586
-    perception   0.004461
-    stimulation  0.004013
+    Term                    
+    visual       2808.248042
+    motor        2741.291072
+    face         1873.797509
+    faces        1781.695003
+    emotional    1177.594334
+    spatial       917.748989
+    memory        873.327746
+    words         777.003601
+    perception    755.889292
+    stimulation   679.940224
 
 
 Plot topic weights
@@ -144,7 +144,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  36.817 seconds)
+**Total running time of the script:** ( 0 minutes  43.638 seconds)
 
 
 

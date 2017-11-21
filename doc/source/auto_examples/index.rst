@@ -149,7 +149,7 @@ General Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.decode_roi.">
+    <div class="sphx-glr-thumbcontainer" tooltip="An example of :obj:`gclda.decode.decode_roi`.">
 
 .. only:: html
 
@@ -166,6 +166,26 @@ General Examples
    :hidden:
 
    /auto_examples/02_general/plot_decode_roi
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Use contextual priors by feeding topic weights from one decoding into another.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_contextual_prior_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_contextual_prior.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/02_general/plot_contextual_prior
 .. raw:: html
 
     <div style='clear:both'></div>

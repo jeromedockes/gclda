@@ -2,7 +2,7 @@
 # ex: set sts=4 ts=4 sw=4 et:
 """
 
-.. _dec4:
+.. _dec2:
 
 ========================================
  Decode unthresholded map
@@ -41,8 +41,8 @@ fig = plotting.plot_stat_map(img_to_decode, display_mode='z',
                              cut_coords=[-28, -4, 20, 50])
 
 ###############################################################################
-# Decode ROI
-# -----------
+# Decode image
+# -------------
 df, topic_weights = decode_continuous(model, img_to_decode)
 
 ###############################################################################

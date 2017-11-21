@@ -4,13 +4,13 @@
 
 
 
-.. _dec2:
+.. _dec1:
 
 =========================================
  Decode binary region of interest
 =========================================
 
-An example of decode.decode_roi.
+An example of :obj:`gclda.decode.decode_roi`.
 
 
 
@@ -61,12 +61,12 @@ Create region of interest (ROI) image
 
 .. code-block:: python
 
-    coords = [[-52, -56, 18]]
+    coords = [[-40, -52, -20]]
     radii = [6] * len(coords)
 
     roi_img = create_sphere(coords, radius=radii, mask=model.dataset.mask_img)
     fig = plotting.plot_roi(roi_img, display_mode='ortho',
-                            cut_coords=[-52, -56, 18],
+                            cut_coords=[-40, -52, -20],
                             draw_cross=False)
 
 
@@ -112,17 +112,17 @@ Get associated terms
  Out::
 
     Weight
-    Term                   
-    mentalizing    0.019629
-    emotional      0.018926
-    social         0.011803
-    mind           0.009781
-    intentions     0.009441
-    mental_states  0.008362
-    intention      0.008273
-    attribution    0.007748
-    number         0.007725
-    emotion        0.007672
+    Term                  
+    face         14.715405
+    faces        11.750837
+    words         2.923485
+    visual        2.515097
+    word          2.102416
+    facial        1.315064
+    color         1.289241
+    identity      1.032067
+    recognition   0.973896
+    selectivity   0.871821
 
 
 Plot topic weights
@@ -146,7 +146,7 @@ Plot topic weights
 
 
 
-**Total running time of the script:** ( 0 minutes  34.487 seconds)
+**Total running time of the script:** ( 0 minutes  40.769 seconds)
 
 
 

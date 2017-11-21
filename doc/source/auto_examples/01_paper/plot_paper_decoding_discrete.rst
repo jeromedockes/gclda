@@ -118,16 +118,16 @@ Temporoparietal seed
 
     Weight
     Term                   
-    mentalizing    0.019629
-    emotional      0.018926
-    social         0.011803
-    mind           0.009781
-    intentions     0.009441
-    mental_states  0.008362
-    intention      0.008273
-    attribution    0.007748
-    number         0.007725
-    emotion        0.007672
+    mentalizing    2.414315
+    emotional      2.327844
+    social         1.451740
+    mind           1.203048
+    intentions     1.161271
+    mental_states  1.028513
+    intention      1.017633
+    attribution    0.952983
+    number         0.950172
+    emotion        0.943711
 
 
 Temporoparietal, medial parietal, and dorsomedial prefrontal seeds
@@ -164,16 +164,16 @@ Temporoparietal, medial parietal, and dorsomedial prefrontal seeds
 
     Weight
     Term                   
-    person         0.009575
-    mentalizing    0.009553
-    social         0.008168
-    mental_states  0.007108
-    emotional      0.006399
-    situation      0.006275
-    mind           0.006087
-    default        0.005371
-    mental         0.005205
-    selectively    0.005099
+    person         3.533031
+    mentalizing    3.525109
+    social         3.014061
+    mental_states  2.622679
+    emotional      2.361156
+    situation      2.315302
+    mind           2.246191
+    default        1.981821
+    mental         1.920779
+    selectively    1.881442
 
 
 Temporoparietal, left superior temporal sulcus, and left inferior frontal gyrus seeds
@@ -209,19 +209,19 @@ Temporoparietal, left superior temporal sulcus, and left inferior frontal gyrus 
 
     Weight
     Term                 
-    words        0.018120
-    word         0.013042
-    emotional    0.012641
-    language     0.010534
-    semantic     0.009955
-    ambiguous    0.008103
-    perception   0.006673
-    mentalizing  0.006174
-    meaning      0.006063
-    knowledge    0.005689
+    words        6.686298
+    word         4.812359
+    emotional    4.664474
+    language     3.887118
+    semantic     3.673409
+    ambiguous    2.989912
+    perception   2.462263
+    mentalizing  2.278094
+    meaning      2.237231
+    knowledge    2.099289
 
 
-**Total running time of the script:** ( 1 minutes  5.683 seconds)
+**Total running time of the script:** ( 1 minutes  5.327 seconds)
 
 
 
