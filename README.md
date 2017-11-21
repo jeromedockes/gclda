@@ -88,7 +88,7 @@ This will print a DueCredit report with relevant citations to your terminal. It 
 
 If you want to compile citations by hand, please cite the following paper if you wish to reference this code:
 
-- Timothy N Rubin, Oluwasanmi Koyejo, Michael N Jones, Tal Yarkoni (Submitted). [Generalized Correspondence-LDA Models (GC-LDA) for Identifying Functional Regions in the Brain](http://pilab.psy.utexas.edu/publications/Rubin_NIPS_2016.pdf).
+- Timothy N Rubin, Oluwasanmi Koyejo, Michael N Jones, Tal Yarkoni (2016). [Generalized Correspondence-LDA Models (GC-LDA) for Identifying Functional Regions in the Brain](http://papers.nips.cc/paper/6274-generalized-correspondence-lda-models-gc-lda-for-identifying-functional-regions-in-the-brain).
 
 Additionally, the following paper demonstrates a variety of cool applications for gcLDA models trained on Neurosynth (such as "brain decoding"):
 
