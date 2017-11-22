@@ -139,7 +139,7 @@ def decode_continuous(model, image, topic_priors=None, prior_weight=1.):
     # Load image file and get voxel values
     input_values = apply_mask(image, model.dataset.mask_img)
     p_topic_g_voxel, _ = model.get_spatial_probs()
-    topic_weights = np.abs(np.squeeze(np.dot(p_topic_g_voxel.T, input_values[:, None])))
+    topic_weights = np.squeeze(np.dot(p_topic_g_voxel.T, input_values[:, None]))
     if topic_priors is not None:
         weighted_priors = weight_priors(topic_priors, prior_weight)
         topic_weights *= weighted_priors
