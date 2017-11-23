@@ -106,4 +106,10 @@ examples/results/
 examples/tutorial_results/
 examples/data/example_dataset/
 data/models/**.pkl
+
+# scikit-learn specific
 doc/_build/
+doc/source/auto_examples/
+doc/modules/generated/
+doc/datasets/generated/
+doc/source/generated/

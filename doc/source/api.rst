@@ -7,7 +7,7 @@ This is the class and function reference of gclda.
 
 .. _base_ref:
 
-:mod:`gclda.dataset`: Base classes and utility functions
+:mod:`gclda.dataset`: Importing and formatting data
 =======================================================
 
 .. automodule:: gclda.dataset
@@ -29,7 +29,7 @@ This is the class and function reference of gclda.
 .. _calibration_ref:
 
 
-:mod:`gclda.model`: Base classes and utility functions
+:mod:`gclda.model`: Model training and evaluation
 =======================================================
 
 .. automodule:: gclda.model
@@ -47,7 +47,7 @@ This is the class and function reference of gclda.
 .. _calibration_ref:
 
 
-:mod:`gclda.decode`: Base classes and utility functions
+:mod:`gclda.decode`: Functional decoding and encoding
 =======================================================
 
 .. automodule:: gclda.decode
@@ -63,5 +63,25 @@ This is the class and function reference of gclda.
    decode.decode_roi
    decode.decode_continuous
    decode.encode
+
+.. _calibration_ref:
+
+
+:mod:`gclda.utils`: Miscellaneous utilities
+=======================================================
+
+.. automodule:: gclda.utils
+   :no-members:
+   :no-inherited-members:
+
+.. currentmodule:: gclda
+
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   utils.get_resource_path
+   utils.weight_priors
+   utils.plot_brain
 
 .. _calibration_ref:
