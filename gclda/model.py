@@ -265,7 +265,7 @@ class Model(object):
 
         # --- Get Log-Likelihood of data for Initialized model and save to
         # variables tracking loglikely
-        self._compute_log_likelihood()
+        self.compute_log_likelihood()
 
     # -------------------------------------------------------------------------------
     # <<<<< Model Parameter Update Methods >>>> Update z, Update y/r, Update regions  |
@@ -307,8 +307,8 @@ class Model(object):
         if self.iter % loglikely_freq == 0:
             if verbose == 2:
                 print('Iter {0:04d}: Computing log-likelihood'.format(self.iter))
-            self._compute_log_likelihood()  # Compute log-likelihood of
-                                                        # model in current state
+            self.compute_log_likelihood()  # Compute log-likelihood of
+                                           # model in current state
             if verbose > 0:
                 print('Iter {0:04d} Log-likely: x = {1:10.1f}, w = {2:10.1f}, '
                       'tot = {3:10.1f}'.format(self.iter, self.loglikely_x[-1],
@@ -375,7 +375,7 @@ class Model(object):
         np.random.seed(randseed)  # pylint: disable=no-member
 
         # Retrieve p(x|r,y) for all subregions
-        peak_probs = self._get_peak_probs()
+        peak_probs = self._get_peak_probs(self.dataset)
 
         # Iterate over all peaks x, and sample a new y and r assignment for each
         for i_ptoken in range(self.n_peak_tokens):
@@ -585,7 +585,7 @@ class Model(object):
     # --------------------------------------------------------------------------------
     @due.dcite(Doi('10.1145/1577069.1755845'),
                description='Describes method for computing log-likelihood used in model.')
-    def _compute_log_likelihood(self, update_vectors=True):
+    def compute_log_likelihood(self, dataset=None, update_vectors=True):
         """
         Compute Log-likelihood of a dataset object given current model.
 
@@ -596,6 +596,10 @@ class Model(object):
 
         Parameters
         ----------
+        dataset : :obj:`gclda.Dataset`, optional
+            The dataset for which log-likelihoods will be calculated.
+            If not provided, log-likelihood will be calculated for the model's
+            dataset.
         update_vectors : :obj:`bool`, optional
             Whether to update model's log-likelihood vectors or not.
 
@@ -616,6 +620,12 @@ class Model(object):
         Distributed algorithms for topic models. Journal of Machine Learning
         Research, 10(Aug), 1801-1828.
         """
+        if dataset is None:
+            dataset = self.dataset
+        elif update_vectors:
+            print('External dataset detected: Disabling update_vectors')
+            update_vectors = False
+
         # --- Pre-compute all probabilities from count matrices that are needed
         # for loglikelihood computations
 
@@ -642,7 +652,7 @@ class Model(object):
         # --- Get the matrix giving p(x_i|r,t) for all x:
         #    NY x NT x NR matrix of probabilities of all peaks given all
         #    topic/subregion spatial distributions
-        peak_probs = self._get_peak_probs()
+        peak_probs = self._get_peak_probs(dataset)
 
         # -----------------------------------------------------------------------------
         # --- Compute observed peaks (x) Loglikelihood:
@@ -651,8 +661,8 @@ class Model(object):
         x_loglikely = 0  # Initialize variable tracking total loglikelihood of all x tokens
 
         # Go over all observed peaks and add p(x|model) to running total
-        for i_ptoken in range(self.n_peak_tokens):
-            doc = self.dataset.ptoken_doc_idx[i_ptoken] - 1  # convert didx from 1-idx to 0-idx
+        for i_ptoken in range(len(dataset.ptoken_doc_idx)):
+            doc = dataset.ptoken_doc_idx[i_ptoken] - 1  # convert didx from 1-idx to 0-idx
             p_x = 0  # Running total for p(x|d) across subregions:
                      # Compute p(x_i|d) for each subregion separately and then
                      # sum across the subregions
@@ -687,11 +697,11 @@ class Model(object):
         p_wtoken_g_doc = np.dot(docprobs_z, np.transpose(wordprobs))
 
         # Go over all observed word tokens and add p(w|model) to running total
-        for i_wtoken in range(len(self.dataset.wtoken_word_idx)):
-            word_token = self.dataset.wtoken_word_idx[i_wtoken] - 1  # convert wtoken_word_idx
-                                                                    # from 1-idx to 0-idx
-            doc = self.dataset.wtoken_doc_idx[i_wtoken] - 1  # convert wtoken_doc_idx from
-                                                            # 1-idx to 0-idx
+        for i_wtoken in range(len(dataset.wtoken_word_idx)):
+            word_token = dataset.wtoken_word_idx[i_wtoken] - 1  # convert wtoken_word_idx
+                                                                # from 1-idx to 0-idx
+            doc = dataset.wtoken_doc_idx[i_wtoken] - 1  # convert wtoken_doc_idx from
+                                                        # 1-idx to 0-idx
             p_wtoken = p_wtoken_g_doc[doc, word_token]  # Probability of sampling current
                                                         # w token from d
             # Add log-probability of current token to running total for all w tokens
@@ -710,7 +720,7 @@ class Model(object):
         # dataset-object containing hold-out data)
         return (x_loglikely, w_loglikely, tot_loglikely)
 
-    def _get_peak_probs(self):
+    def _get_peak_probs(self, dataset):
         """
         Compute a matrix giving p(x|r,t), using all x values in a dataset
         object, and each topic's spatial parameters.
@@ -721,11 +731,11 @@ class Model(object):
             nPeaks x nTopics x nRegions matrix of probabilities, giving
             probability of sampling each peak (x) from all subregions.
         """
-        peak_probs = np.zeros(shape=(self.n_peak_tokens, self.n_topics,
+        peak_probs = np.zeros(shape=(len(dataset.ptoken_doc_idx), self.n_topics,
                                      self.n_regions), dtype=float)
         for i_topic in range(self.n_topics):
             for j_region in range(self.n_regions):
-                pdf = multivariate_normal.pdf(self.dataset.peak_vals,
+                pdf = multivariate_normal.pdf(dataset.peak_vals,
                                               mean=self.regions_mu[i_topic][j_region][0],
                                               cov=self.regions_sigma[i_topic][j_region])
                 peak_probs[:, i_topic, j_region] = pdf
