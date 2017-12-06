@@ -844,7 +844,7 @@ class Model(object):
 
         if not isinstance(model, Model):
             raise IOError('Pickled object must be `gclda.model.Model`, '
-                          'not {0}'.format(type(dataset)))
+                          'not {0}'.format(type(model)))
 
         return model
 
