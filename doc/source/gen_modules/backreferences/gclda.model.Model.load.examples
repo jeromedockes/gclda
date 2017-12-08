@@ -41,24 +41,6 @@ Examples using ``gclda.model.Model.load``
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plot topic figures and show them.">
-
-.. only:: html
-
-    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_show_topic_figures_thumb.png
-
-        :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`
-
-.. raw:: html
-
-    </div>
-
-.. only:: not html
-
-    * :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="An example of decode.encode.">
 
 .. only:: html
@@ -128,3 +110,21 @@ Examples using ``gclda.model.Model.load``
 .. only:: not html
 
     * :ref:`sphx_glr_auto_examples_02_general_plot_contextual_prior.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot topic figures and show them.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_show_topic_figures_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`

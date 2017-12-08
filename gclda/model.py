@@ -1123,7 +1123,7 @@ class Model(object):
 
         Parameters
         ----------
-        debug : obj:`bool`, optional
+        debug : :obj:`bool`, optional
             Setting debug to True will print out additional information useful
             for debugging the model. Default = False.
         """

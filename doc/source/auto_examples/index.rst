@@ -69,26 +69,6 @@ General Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plot topic figures and show them.">
-
-.. only:: html
-
-    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_show_topic_figures_thumb.png
-
-        :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/02_general/plot_show_topic_figures
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="An example of dataset.Dataset and model.Model.">
 
 .. only:: html
@@ -186,6 +166,26 @@ General Examples
    :hidden:
 
    /auto_examples/02_general/plot_contextual_prior
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot topic figures and show them.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/02_general/images/thumb/sphx_glr_plot_show_topic_figures_thumb.png
+
+        :ref:`sphx_glr_auto_examples_02_general_plot_show_topic_figures.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/02_general/plot_show_topic_figures
 .. raw:: html
 
     <div style='clear:both'></div>

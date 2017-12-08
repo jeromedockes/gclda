@@ -15,9 +15,11 @@ Plot topic figures and show them.
 # Start with the necessary imports
 # --------------------------------
 from os.path import join
-from shutil import rmtree
 
-from IPython.display import Image
+import numpy as np
+import pandas as pd
+from nilearn import plotting
+from nilearn.masking import unmask
 
 from gclda.model import Model
 from gclda.utils import get_resource_path
@@ -30,27 +32,54 @@ model_file = join(get_resource_path(), 'models/Neurosynth2015Filtered2',
 model = Model.load(model_file)
 
 ###############################################################################
-# Save topic figures
+# Get spatial probability
 # -----------------------
-out_dir = 'temp/'
-model.save_topic_figures(outputdir=out_dir)
+p_voxel_g_topic, _ = model.get_spatial_probs()
 
 ###############################################################################
-# Show first topic figure
+# Show topic 10
 # -----------------------
-Image(filename=join(out_dir, 'Topic_11.png'), embed=True)
+topic_no = 10
+img = unmask(p_voxel_g_topic[:, topic_no], model.dataset.mask_img)
+
+# Get strings giving top K words and probs for the current topic
+wprobs = model.n_word_tokens_word_by_topic[:, topic_no] + model.beta
+wprobs = wprobs / np.sum(wprobs)
+word_probs = zip(*[model.dataset.word_labels, wprobs])
+df = pd.DataFrame(columns=['term', 'probability'], data=word_probs)
+df = df.sort_values(by='probability', ascending=False).reset_index(drop=True)
+print df.head(12)
+
+fig = plotting.plot_stat_map(img, display_mode='z')
 
 ###############################################################################
-# Show second topic figure
+# Show topic 59
 # ------------------------
-Image(filename=join(out_dir, 'Topic_59.png'), embed=True)
+topic_no = 58
+img = unmask(p_voxel_g_topic[:, topic_no], model.dataset.mask_img)
+
+# Get strings giving top K words and probs for the current topic
+wprobs = model.n_word_tokens_word_by_topic[:, topic_no] + model.beta
+wprobs = wprobs / np.sum(wprobs)
+word_probs = zip(*[model.dataset.word_labels, wprobs])
+df = pd.DataFrame(columns=['term', 'probability'], data=word_probs)
+df = df.sort_values(by='probability', ascending=False).reset_index(drop=True)
+print df.head(12)
+
+fig = plotting.plot_stat_map(img, display_mode='z')
 
 ###############################################################################
-# Show third topic figure
+# Show topic 150
 # -----------------------
-Image(filename=join(out_dir, 'Topic_150.png'), embed=True)
+topic_no = 149
+img = unmask(p_voxel_g_topic[:, topic_no], model.dataset.mask_img)
 
-###############################################################################
-# Clean up generated files
-# ------------------------
-rmtree(out_dir)
+# Get strings giving top K words and probs for the current topic
+wprobs = model.n_word_tokens_word_by_topic[:, topic_no] + model.beta
+wprobs = wprobs / np.sum(wprobs)
+word_probs = zip(*[model.dataset.word_labels, wprobs])
+df = pd.DataFrame(columns=['term', 'probability'], data=word_probs)
+df = df.sort_values(by='probability', ascending=False).reset_index(drop=True)
+print df.head(12)
+
+fig = plotting.plot_stat_map(img, display_mode='z')
