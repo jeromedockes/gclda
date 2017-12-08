@@ -11,5 +11,6 @@ numpydoc
 nilearn
 sphinx_gallery
 sphinx_rtd_theme
+IPython
 https://github.com/tsalo/neurosynth/archive/py3.zip
 https://github.com/ljchang/nltools/archive/0.3.2.zip

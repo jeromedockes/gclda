@@ -24,7 +24,7 @@ Start with the necessary imports
     from os.path import join
     from shutil import rmtree
 
-    from IPython.display import Image
+    from IPython.display import Image, SVG
 
     from gclda.model import Model
     from gclda.utils import get_resource_path
@@ -75,10 +75,30 @@ Show first topic figure
 
 .. code-block:: python
 
-    Image(filename=join(out_dir, 'Topic_11.png'), embed=True)
+    SVG(filename=join(out_dir, 'Topic_11.png'))
+    #Image(filename=join(out_dir, 'Topic_11.png'), embed=True)
 
 
 
+
+.. code-block:: pytb
+
+    Traceback (most recent call last):
+      File "/Users/tsalo/Documents/tsalo/python_gclda/examples/02_general/plot_show_topic_figures.py", line 41, in <module>
+        SVG(filename=join(out_dir, 'Topic_11.png'))
+      File "/Users/tsalo/anaconda/lib/python2.7/site-packages/IPython/core/display.py", line 394, in __init__
+        self.reload()
+      File "/Users/tsalo/anaconda/lib/python2.7/site-packages/IPython/core/display.py", line 413, in reload
+        self.data = f.read()
+      File "/Users/tsalo/anaconda/lib/python2.7/site-packages/IPython/core/display.py", line 498, in data
+        x = minidom.parseString(svg)
+      File "/Users/tsalo/anaconda/lib/python2.7/xml/dom/minidom.py", line 1928, in parseString
+        return expatbuilder.parseString(string)
+      File "/Users/tsalo/anaconda/lib/python2.7/xml/dom/expatbuilder.py", line 940, in parseString
+        return builder.parseString(string)
+      File "/Users/tsalo/anaconda/lib/python2.7/xml/dom/expatbuilder.py", line 223, in parseString
+        parser.Parse(string, True)
+    ExpatError: not well-formed (invalid token): line 1, column 0
 
 
 
@@ -93,11 +113,6 @@ Show second topic figure
     Image(filename=join(out_dir, 'Topic_59.png'), embed=True)
 
 
-
-
-
-
-
 Show third topic figure
 -----------------------
 
@@ -106,11 +121,6 @@ Show third topic figure
 .. code-block:: python
 
     Image(filename=join(out_dir, 'Topic_150.png'), embed=True)
-
-
-
-
-
 
 
 Clean up generated files
@@ -122,12 +132,7 @@ Clean up generated files
 
     rmtree(out_dir)
 
-
-
-
-
-
-**Total running time of the script:** ( 3 minutes  40.166 seconds)
+**Total running time of the script:** ( 3 minutes  32.355 seconds)
 
 
 
