@@ -46,13 +46,29 @@ def decode_roi(model, roi, topic_priors=None, prior_weight=1.):
 
     Notes
     -----
-    1.  Compute p_topic_g_voxel.
-            - From Model
-    2.  Compute topic weight vector (tau_t).
-            - topic_weights = np.sum(p_topic_g_voxel, axis=1) (across voxels)
-    3.  Multiply tau_t by topic-by-word matrix (p_word_g_topic).
-    4.  The resulting vector (tau_t*p_word_g_topic) should be word weights
-        for your selected studies.
+    ======================    ==============================================================
+    Notation                  Meaning
+    ======================    ==============================================================
+    :math:`v`                 Voxel
+    :math:`t`                 Topic
+    :math:`w`                 Word type
+    :math:`r`                 Region of interest (ROI)
+    :math:`p(v|t)`            Probability of topic given voxel (``p_topic_g_voxel``)
+    :math:`\\tau_{t}`          Topic weight vector (``topic_weights``)
+    :math:`p(w|t)`            Probability of word type given topic (``p_word_g_topic``)
+    ======================    ==============================================================
+
+    1.  Compute
+        :math:`p(v|t)`.
+            - From :obj:`gclda.model.Model.get_spatial_probs()`
+    2.  Compute topic weight vector (:math:`\\tau_{t}`) by adding across voxels
+        within ROI.
+            - :math:`\\tau_{t} = \sum_{i} {p(t|v_{i})}`
+    3.  Multiply :math:`\\tau_{t}` by
+        :math:`p(w|t)`.
+            - :math:`p(w|r) \propto \\tau_{t} \cdot p(w|t)`
+    4.  The resulting vector (``word_weights``) reflects arbitrarily scaled
+        term weights for the ROI.
     """
     if isinstance(roi, str):
         roi = nib.load(roi)
@@ -121,13 +137,31 @@ def decode_continuous(model, image, topic_priors=None, prior_weight=1.):
 
     Notes
     -----
-    1.  Compute p_topic_g_voxel.
-    2.  Compute topic weight vector (tau_t) by multiplying p_topic_g_voxel
-        by input image.
-    3.  Multiply tau_t by topic-by-word matrix (p_word_g_topic).
-    4.  The resulting vector (tau_t*p_word_g_topic) should be word weights
-        for your map, but the values are scaled based on the input image, so
-        they won't necessarily mean much.
+    ======================    ==============================================================
+    Notation                  Meaning
+    ======================    ==============================================================
+    :math:`v`                 Voxel
+    :math:`t`                 Topic
+    :math:`w`                 Word type
+    :math:`i`                 Input image
+    :math:`p(v|t)`            Probability of topic given voxel (``p_topic_g_voxel``)
+    :math:`\\tau_{t}`          Topic weight vector (``topic_weights``)
+    :math:`p(w|t)`            Probability of word type given topic (``p_word_g_topic``)
+    :math:`\omega`            1d array from input image (``input_values``)
+    ======================    ==============================================================
+
+    1.  Compute :math:`p(t|v)`
+        (``p_topic_g_voxel``).
+            - From :obj:`gclda.model.Model.get_spatial_probs()`
+    2.  Squeeze input image to 1d array :math:`\omega` (``input_values``).
+    3.  Compute topic weight vector (:math:`\\tau_{t}`) by multiplying
+        :math:`p(t|v)` by input image.
+            - :math:`\\tau_{t} = p(t|v) \cdot \omega`
+    4.  Multiply :math:`\\tau_{t}` by
+        :math:`p(w|t)`.
+            - :math:`p(w|i) \propto \\tau_{t} \cdot p(w|t)`
+    5.  The resulting vector (``word_weights``) reflects arbitrarily scaled
+        term weights for the input image.
 
     """
     if isinstance(image, str):
@@ -159,7 +193,7 @@ def decode_continuous(model, image, topic_priors=None, prior_weight=1.):
 @due.dcite(Doi('10.1371/journal.pcbi.1005649'),
            description='Describes decoding methods using GC-LDA.')
 def encode(model, text, out_file=None, topic_priors=None, prior_weight=1.):
-    r"""
+    """
     Perform text-to-image encoding.
 
     Parameters
@@ -186,41 +220,37 @@ def encode(model, text, out_file=None, topic_priors=None, prior_weight=1.):
 
     Notes
     -----
-    The matrix p_topic_g_word is computed from the input text
+    ======================    ==============================================================
+    Notation                  Meaning
+    ======================    ==============================================================
+    :math:`v`                 Voxel
+    :math:`t`                 Topic
+    :math:`w`                 Word type
+    :math:`h`                 Input text
+    :math:`p(v|t)`            Probability of topic given voxel (``p_topic_g_voxel``)
+    :math:`\\tau_{t}`          Topic weight vector (``topic_weights``)
+    :math:`p(w|t)`            Probability of word type given topic (``p_word_g_topic``)
+    :math:`\omega`            1d array from input image (``input_values``)
+    ======================    ==============================================================
 
-    Terminology:
-
-    .. math ::
-        P_{tw}: Matrix of stuff
-
-    Derive topic weights:
-
-    .. math ::
-        P_{tw} &= p(t = i|w = j)
-
-               &= \frac{p(w = j|t = i) * p(t = i)}{p(w)}
-
-               &= \frac{\Phi_{ji}}{\sum_{i=1}^{T} \Phi_{ji}}
-
-        \tau_{t} = \sum_{w} P_{tw}
-
-    Derive voxel weights:
-
-    .. math ::
-        values = \tau_{t} \cdot A
-
-    Summary:
-
-    1.  Compute p_topic_g_word.
-            - p_topic_g_word = p_word_g_topic * p_topic / p_word
-            - p_topic is uniform (1/n topics)
-    2.  Compute topic weight vector (tau_t).
-            - tau_t = np.sum(p_topic_g_word, axis=1) (across words)
-    3.  Multiply tau_t by topic-by-voxel matrix of smoothed p_voxel_g_topic
-        (A; not sure where it is, but I don't think it's the same as A in
-        model.py).
-    4.  The resulting map (tau_t*A) is the encoded image. Values are *not*
-        probabilities.
+    1.  Compute :math:`p(v|t)`
+        (``p_voxel_g_topic``).
+            - From :obj:`gclda.model.Model.get_spatial_probs()`
+    2.  Compute :math:`p(t|w)`
+        (``p_topic_g_word``).
+    3.  Vectorize input text according to model vocabulary.
+    4.  Reduce :math:`p(t|w)` to only include word types in input text.
+    5.  Compute :math:`p(t|h)` (``p_topic_g_text``) by multiplying :math:`p(t|w)`
+        by word counts for input text.
+    6.  Sum topic weights (:math:`\\tau_{t}`) across
+        words.
+            - :math:`\\tau_{t} = \sum_{i}{p(t|h_{i})}`
+    7.  Compute voxel
+        weights.
+            - :math:`p(v|h) \propto p(v|t) \cdot \\tau_{t}`
+    8.  The resulting array (``voxel_weights``) reflects arbitrarily scaled
+        voxel weights for the input text.
+    9.  Unmask and reshape ``voxel_weights`` into brain image.
     """
     if isinstance(text, list):
         text = ' '.join(text)
