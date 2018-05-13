@@ -47,6 +47,8 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx_gallery.gen_gallery',
+    'sphinx.ext.napoleon',
+    'sphinxarg.ext',
 ]
 
 # pngmath / imgmath compatibility layer for different sphinx versions
