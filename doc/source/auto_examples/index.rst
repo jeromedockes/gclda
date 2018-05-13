@@ -169,7 +169,7 @@ General Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plot topic figures and show them.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Example script with invalid Python syntax ">
 
 .. only:: html
 
