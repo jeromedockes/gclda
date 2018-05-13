@@ -8,7 +8,7 @@ This is the class and function reference of gclda.
 .. _base_ref:
 
 :mod:`gclda.dataset`: Importing and formatting data
-=======================================================
+---------------------------------------------------
 
 .. automodule:: gclda.dataset
    :no-members:
@@ -30,7 +30,7 @@ This is the class and function reference of gclda.
 
 
 :mod:`gclda.model`: Model training and evaluation
-=======================================================
+-------------------------------------------------
 
 .. automodule:: gclda.model
    :no-members:
@@ -48,7 +48,7 @@ This is the class and function reference of gclda.
 
 
 :mod:`gclda.decode`: Functional decoding and encoding
-=======================================================
+-----------------------------------------------------
 
 .. automodule:: gclda.decode
    :no-members:
@@ -68,7 +68,7 @@ This is the class and function reference of gclda.
 
 
 :mod:`gclda.utils`: Miscellaneous utilities
-=======================================================
+-------------------------------------------
 
 .. automodule:: gclda.utils
    :no-members:
