@@ -15,8 +15,12 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath('sphinxext'))
-import sphinxext
+sys.path.insert(0, os.path.abspath('./sphinxext'))
+
+try:
+    import sphinxext
+except:
+    raise Exception('{0}\n\n{1}'.format(sys.path, os.path.abspath('./sphinxext')))
 
 import sphinx_rtd_theme
 
