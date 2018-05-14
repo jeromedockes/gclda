@@ -15,7 +15,8 @@
 import sys
 import os
 
-raise Exception(os.path.isdir(os.path.abspath('modules')))
+sys.path.insert(0, os.path.abspath('sphinxext'))
+import sphinxext
 
 import sphinx_rtd_theme
 
