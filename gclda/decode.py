@@ -54,7 +54,7 @@ def decode_roi(model, roi, topic_priors=None, prior_weight=1.):
     :math:`w`                 Word type
     :math:`r`                 Region of interest (ROI)
     :math:`p(v|t)`            Probability of topic given voxel (``p_topic_g_voxel``)
-    :math:`\\tau_{t}`          Topic weight vector (``topic_weights``)
+    :math:`p(t|r)`            Probability of topic given ROI (``topic_weights``)
     :math:`p(w|t)`            Probability of word type given topic (``p_word_g_topic``)
     ======================    ==============================================================
 
@@ -145,7 +145,7 @@ def decode_continuous(model, image, topic_priors=None, prior_weight=1.):
     :math:`w`                 Word type
     :math:`i`                 Input image
     :math:`p(v|t)`            Probability of topic given voxel (``p_topic_g_voxel``)
-    :math:`\\tau_{t}`          Topic weight vector (``topic_weights``)
+    :math:`p(t|i)`            Topic weight vector (``topic_weights``)
     :math:`p(w|t)`            Probability of word type given topic (``p_word_g_topic``)
     :math:`\omega`            1d array from input image (``input_values``)
     ======================    ==============================================================
