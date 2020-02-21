@@ -33,21 +33,31 @@ model = Model.load(model_file)
 ###############################################################################
 # Encode text into image
 # ----------------------
-text = 'painful stimulation during a language task'
-text_img, topic_weights = encode(model, text)
+# text = 'painful stimulation during a language task'
+text_file = '/tmp/gclda_query_list.txt'
+with open(text_file) as f:
+    queries = [l.strip() for l in f]
 
-###############################################################################
-# Show encoded image
-# ---------------------
-fig = plotting.plot_stat_map(text_img, display_mode='z',
-                             threshold=0.00001,
-                             cut_coords=[-2, 22, 44, 66])
+for text in queries:
+    print(text)
+    text_img, topic_weights = encode(model, text)
 
-###############################################################################
+    ###############################################################################
+    # Show encoded image
+    # ---------------------
+    fig = plotting.plot_stat_map(
+        text_img, display_mode='z',
+        threshold=0.00001,
+        cut_coords=12,
+        output_file='/tmp/gclda_figures/{}.png'.format(text.replace(' ', '_')))
+                                # cut_coords=[-2, 22, 44, 66])
+
+    ###############################################################################
 # Plot topic weights
 # ------------------
-fig2, ax2 = plt.subplots()
-ax2.plot(topic_weights)
-ax2.set_xlabel('Topic #')
-ax2.set_ylabel('Weight')
-fig2.show()
+# fig2, ax2 = plt.subplots()
+# ax2.plot(topic_weights)
+# ax2.set_xlabel('Topic #')
+# ax2.set_ylabel('Weight')
+# fig2.show()
+# plt.show()
